@@ -1,0 +1,6 @@
+{
+  "name": "Satvik Events and Caters",
+  "description": "A premium catering and food ordering website with real-time order tracking, event planning, payment simulation, and a dedicated AI culinary helper.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
