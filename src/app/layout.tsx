@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { CartProvider } from '@/context/CartContext';
 
 export const metadata: Metadata = {
   title: 'Satvik Caters and Events | Pure Vegetarian Catering & Dining',
@@ -56,7 +57,9 @@ export default function RootLayout({
       </head>
       <body className="antialiased min-h-screen">
         <ThemeProvider>
-          {children}
+          <CartProvider>
+            {children}
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

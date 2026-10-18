@@ -24,18 +24,58 @@ export const supabaseAdmin: SupabaseClient | null =
     ? createClient(supabaseUrl, supabaseServiceKey)
     : supabase;
 
-// --- Supabase Helper Methods with Failover to Local Storage ---
+// --- Admin Authentication ---
+export async function verifyAdminCredentials(email: string, pass: string): Promise<boolean> {
+  const targetEmail = 'umeshbiz16@gmail.com';
+  const targetPass = 'Umesh#2032';
 
+  if (!email || !pass) return false;
+
+  // Direct check first
+  const isDirectMatch = email.trim().toLowerCase() === targetEmail.toLowerCase() && pass === targetPass;
+
+  if (supabaseAdmin) {
+    try {
+      // Check admin_users table in Supabase
+      const { data, error } = await supabaseAdmin
+        .from('admin_users')
+        .select('*')
+        .eq('email', email.trim().toLowerCase())
+        .limit(1);
+
+      if (!error && data && data.length > 0) {
+        const adminUser = data[0];
+        return adminUser.password_hash === pass || adminUser.password === pass || isDirectMatch;
+      }
+
+      // If user matched direct credentials but table doesn't have it yet, seed it into Supabase
+      if (isDirectMatch) {
+        await supabaseAdmin.from('admin_users').upsert({
+          email: targetEmail,
+          password_hash: targetPass,
+          role: 'admin',
+          created_at: new Date().toISOString()
+        }, { onConflict: 'email' });
+        return true;
+      }
+    } catch (err) {
+      console.warn('Supabase admin_users check error, fallback to direct validation:', err);
+    }
+  }
+
+  return isDirectMatch;
+}
+
+// --- Supabase Helper Methods for Menu Items ---
 export async function fetchMenuItemsFromSupabase(fallbackData: any[]): Promise<any[]> {
   if (!supabase) return fallbackData;
   try {
     const { data, error } = await supabase
       .from('menu_items')
       .select('*')
-      .order('id', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (error || !data || data.length === 0) {
-      console.warn('Supabase menu_items query returned empty or error, using local fallback:', error?.message);
       return fallbackData;
     }
     return data;
@@ -58,16 +98,66 @@ export async function fetchKiloDishesFromSupabase(fallbackData: any[]): Promise<
     }
     return data;
   } catch (err) {
-    console.warn('Supabase connection error for kilo_dishes, using local fallback:', err);
     return fallbackData;
   }
 }
 
-export async function saveOrderToSupabase(order: any): Promise<boolean> {
+export async function insertMenuItemToSupabase(item: any): Promise<{ data: any; error: any }> {
   const client = supabaseAdmin || supabase;
-  if (!client) return false;
+  if (!client) {
+    return { data: item, error: null };
+  }
+  try {
+    const { data, error } = await client
+      .from('menu_items')
+      .insert([item])
+      .select()
+      .single();
+    return { data, error };
+  } catch (err: any) {
+    return { data: null, error: err };
+  }
+}
+
+export async function updateMenuItemInSupabase(id: string, updates: any): Promise<{ data: any; error: any }> {
+  const client = supabaseAdmin || supabase;
+  if (!client) {
+    return { data: updates, error: null };
+  }
+  try {
+    const { data, error } = await client
+      .from('menu_items')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    return { data, error };
+  } catch (err: any) {
+    return { data: null, error: err };
+  }
+}
+
+export async function deleteMenuItemFromSupabase(id: string): Promise<{ success: boolean; error: any }> {
+  const client = supabaseAdmin || supabase;
+  if (!client) {
+    return { success: true, error: null };
+  }
   try {
     const { error } = await client
+      .from('menu_items')
+      .delete()
+      .eq('id', id);
+    return { success: !error, error };
+  } catch (err: any) {
+    return { success: false, error: err };
+  }
+}
+
+export async function saveOrderToSupabase(order: any): Promise<boolean> {
+  if (!supabaseAdmin && !supabase) return false;
+  try {
+    const client = supabaseAdmin || supabase;
+    const { error } = await client!
       .from('orders')
       .insert([
         {

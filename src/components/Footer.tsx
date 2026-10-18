@@ -79,6 +79,11 @@ export default function Footer() {
                   Catering & Train Services
                 </Link>
               </li>
+              <li>
+                <Link href="/cart" className="hover:text-[#B8860B] dark:hover:text-amber-400 transition-colors">
+                  My Cart & Checkout
+                </Link>
+              </li>
             </ul>
           </div>
 

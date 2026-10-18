@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from '@/context/ThemeContext';
+import { useCart } from '@/context/CartContext';
 import { SunMoonThemeToggle } from '@/components/ui/sun-moon-theme-toggle';
-import { Menu as MenuIcon, X } from 'lucide-react';
+import { Menu as MenuIcon, X, ShoppingBag } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { theme } = useTheme();
+  const { totalCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -30,26 +32,25 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-stone-200/80 bg-white/95 backdrop-blur-md dark:bg-stone-950/95 dark:border-stone-800 transition-colors shadow-xs">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         
-        {/* Brand Logo - Responsive & High Contrast on Light/Dark Themes */}
+        {/* Brand Logo - Enlarged inside the navbar for prominent visibility */}
         <div className="flex items-center">
           <Link 
             href="/" 
-            className="flex items-center space-x-2 py-1 outline-none group"
+            className="flex items-center space-x-2 py-0.5 outline-none group"
             id="navbar-brand-link"
           >
-            {/* Show light theme logo when theme is light, dark theme logo when theme is dark */}
             {theme === 'dark' ? (
               <img
                 src="/images/logo-dark.png"
                 alt="Satvik Caters & Events"
-                className="h-11 sm:h-12 md:h-13 w-auto object-contain transition-transform duration-200 group-hover:scale-102"
+                className="h-16 sm:h-17 md:h-18 max-h-[74px] w-auto object-contain transition-transform duration-200 group-hover:scale-102"
                 id="brand-logo-dark"
               />
             ) : (
               <img
                 src="/images/logo-light.png"
                 alt="Satvik Caters & Events"
-                className="h-11 sm:h-12 md:h-13 w-auto object-contain transition-transform duration-200 group-hover:scale-102"
+                className="h-16 sm:h-17 md:h-18 max-h-[74px] w-auto object-contain transition-transform duration-200 group-hover:scale-102"
                 id="brand-logo-light"
               />
             )}
@@ -79,10 +80,26 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right Section: Animated Sun-Moon Theme Toggle & Mobile Menu Trigger */}
+        {/* Right Section: Cart Link, Sun-Moon Toggle, & Mobile Menu Trigger */}
         <div className="flex items-center space-x-3 sm:space-x-4">
+          
+          {/* Cart Icon Button linking to /cart */}
+          <Link
+            href="/cart"
+            className="relative flex items-center justify-center p-2 rounded-full text-stone-700 hover:text-[#B8860B] hover:bg-amber-50 dark:text-stone-300 dark:hover:text-amber-400 dark:hover:bg-amber-950/40 transition-colors"
+            title="View Cart"
+            id="navbar-cart-btn"
+          >
+            <ShoppingBag className="h-5 w-5" />
+            {totalCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4.5 min-w-4.5 px-1 items-center justify-center rounded-full bg-[#B8860B] text-[10px] font-bold text-white shadow-xs">
+                {totalCount}
+              </span>
+            )}
+          </Link>
+
           {/* Animated Sun-Moon Toggle Component */}
-          <div className="flex items-center pl-2">
+          <div className="flex items-center">
             <SunMoonThemeToggle size={34} duration={700} sky={true} />
           </div>
 
@@ -128,6 +145,23 @@ export default function Navbar() {
                 </Link>
               );
             })}
+            
+            {/* Cart Link in Mobile Navigation */}
+            <Link
+              href="/cart"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2.5 rounded-md text-sm font-semibold transition-colors flex items-center justify-between text-stone-700 hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-900 border-t border-stone-100 dark:border-stone-800 mt-2 pt-3"
+            >
+              <div className="flex items-center space-x-2">
+                <ShoppingBag className="h-4 w-4 text-[#B8860B]" />
+                <span>My Cart</span>
+              </div>
+              {totalCount > 0 && (
+                <span className="bg-[#B8860B] text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                  {totalCount} items
+                </span>
+              )}
+            </Link>
           </div>
         </div>
       )}
