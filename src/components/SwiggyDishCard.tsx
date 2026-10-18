@@ -67,8 +67,12 @@ export default function SwiggyDishCard({ dish, onSeeInside }: SwiggyDishCardProp
         {/* Right Side: Dish Image */}
         <div className="relative w-full sm:w-36 h-36 sm:h-28 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800 shrink-0 self-center sm:self-start">
           <img
-            src={dish.image}
+            src={dish.image || '/images/satvik_royal_thali_1783699368595.jpg'}
             alt={dish.name}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = '/images/satvik_royal_thali_1783699368595.jpg';
+            }}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-108"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />

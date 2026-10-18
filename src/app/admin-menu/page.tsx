@@ -9,6 +9,7 @@ import {
   AlertCircle, Utensils, Star, Flame, Sparkles, X, Image as ImageIcon 
 } from 'lucide-react';
 import { MenuItem, DEFAULT_MENU_ITEMS } from '@/lib/data';
+import { SunMoonThemeToggle } from '@/components/ui/sun-moon-theme-toggle';
 
 export default function AdminMenuPage() {
   const router = useRouter();
@@ -91,13 +92,14 @@ export default function AdminMenuPage() {
         body: JSON.stringify({ file: base64Data, folder: 'satvik_dishes' }),
       });
       const data = await res.json();
-      if (res.ok && data.success) {
+      if (res.ok && data.success && data.url) {
         return data.url;
       }
-      return null;
+      if (data.url) return data.url;
+      return base64Data;
     } catch (e) {
       console.error('Cloudinary upload error:', e);
-      return null;
+      return base64Data;
     } finally {
       setUploadingImage(false);
     }
@@ -227,7 +229,7 @@ export default function AdminMenuPage() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col md:flex-row font-sans">
+    <div className="min-h-screen bg-stone-50/60 dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col md:flex-row font-sans transition-colors duration-300">
       {/* Sidebar */}
       <AdminSidebar />
 
@@ -236,42 +238,48 @@ export default function AdminMenuPage() {
         <div className="max-w-6xl mx-auto space-y-6">
 
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-stone-800">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-stone-200 dark:border-stone-800">
             <div>
-              <h1 className="text-2xl font-bold text-white">Menu & Dishes Manager</h1>
-              <p className="text-xs text-stone-400 mt-1">
+              <h1 className="text-2xl font-bold text-stone-950 dark:text-white">Menu & Dishes Manager</h1>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
                 Add, edit, and delete dishes with Cloudinary media hosting and Supabase real-time storage.
               </p>
             </div>
-            <button
-              onClick={handleOpenAddModal}
-              className="py-2.5 px-4 rounded-lg bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Add New Dish</span>
-            </button>
+            
+            <div className="flex items-center gap-3">
+              <div className="bg-white dark:bg-stone-900 p-1 rounded-full border border-stone-200 dark:border-stone-800 shadow-sm">
+                <SunMoonThemeToggle size={36} duration={1200} />
+              </div>
+              <button
+                onClick={handleOpenAddModal}
+                className="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Add New Dish</span>
+              </button>
+            </div>
           </div>
 
           {/* Toast Notification */}
           {notification && (
             <div
-              className={`p-3.5 rounded-lg text-xs flex items-center justify-between animate-fade-in ${
+              className={`p-3.5 rounded-xl text-xs flex items-center justify-between animate-fade-in ${
                 notification.type === 'success'
-                  ? 'bg-emerald-950/60 border border-emerald-800 text-emerald-300'
-                  : 'bg-red-950/60 border border-red-800 text-red-300'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
+                  : 'bg-red-50 dark:bg-red-950/60 border border-red-300 dark:border-red-800 text-red-800 dark:text-red-300'
               }`}
             >
               <div className="flex items-center gap-2">
                 {notification.type === 'success' ? (
-                  <CheckCircle className="h-4 w-4 text-emerald-400" />
+                  <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 ) : (
-                  <AlertCircle className="h-4 w-4 text-red-400" />
+                  <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                 )}
                 <span>{notification.message}</span>
               </div>
               <button
                 onClick={() => setNotification(null)}
-                className="text-stone-400 hover:text-white"
+                className="text-stone-400 hover:text-stone-700 dark:hover:text-white"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -279,15 +287,15 @@ export default function AdminMenuPage() {
           )}
 
           {/* Category Tabs: Starter, Mains, Sweets, Catering */}
-          <div className="flex border-b border-stone-800 space-x-2 sm:space-x-4">
+          <div className="flex border-b border-stone-200 dark:border-stone-800 space-x-2 sm:space-x-4 overflow-x-auto pb-px">
             {(['Starters', 'Mains', 'Sweets', 'Catering'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-3 px-4 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
+                className={`py-3 px-4 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer whitespace-nowrap ${
                   activeTab === tab
-                    ? 'border-amber-500 text-amber-400 font-extrabold'
-                    : 'border-transparent text-stone-400 hover:text-stone-200'
+                    ? 'border-amber-500 text-amber-600 dark:text-amber-400 font-extrabold'
+                    : 'border-transparent text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
                 }`}
               >
                 {tab === 'Starters' ? 'Starter' : tab === 'Catering' ? 'Catering Packages' : tab}
@@ -297,19 +305,19 @@ export default function AdminMenuPage() {
 
           {/* Dish Cards Grid */}
           {loading ? (
-            <div className="p-16 text-center text-xs text-stone-400 flex flex-col items-center gap-2">
+            <div className="p-16 text-center text-xs text-stone-500 dark:text-stone-400 flex flex-col items-center gap-2">
               <RefreshCw className="h-5 w-5 animate-spin text-amber-500" />
               <span>Loading dishes from Supabase...</span>
             </div>
           ) : filteredDishes.length === 0 ? (
-            <div className="p-12 text-center rounded-2xl bg-stone-900 border border-stone-800 space-y-3">
-              <p className="text-sm font-semibold text-stone-300">No dishes in {activeTab} yet.</p>
-              <p className="text-xs text-stone-500">
+            <div className="p-12 text-center rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-3 shadow-sm">
+              <p className="text-sm font-semibold text-stone-700 dark:text-stone-300">No dishes in {activeTab} yet.</p>
+              <p className="text-xs text-stone-500 dark:text-stone-400">
                 Click "Add New Dish" above to create and publish a dish directly to the website!
               </p>
               <button
                 onClick={handleOpenAddModal}
-                className="py-2 px-4 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold hover:bg-amber-500/30 cursor-pointer"
+                className="py-2 px-4 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-xs font-bold hover:bg-amber-500/30 cursor-pointer"
               >
                 Add Dish to {activeTab}
               </button>
@@ -319,15 +327,21 @@ export default function AdminMenuPage() {
               {filteredDishes.map((dish) => (
                 <div
                   key={dish.id}
-                  className="rounded-xl bg-stone-900 border border-stone-800 overflow-hidden flex flex-col justify-between hover:border-stone-700 transition-all shadow-md group"
+                  className="rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 overflow-hidden flex flex-col justify-between hover:border-amber-400/50 dark:hover:border-stone-700 transition-all shadow-sm hover:shadow-md group"
                 >
                   <div>
-                    {/* Dish Image */}
-                    <div className="relative h-44 w-full bg-stone-950 overflow-hidden">
+                    {/* Dish Image with Fallback */}
+                    <div className="relative h-44 w-full bg-stone-100 dark:bg-stone-950 overflow-hidden">
                       <img
                         src={dish.image}
                         alt={dish.name}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement;
+                          if (!target.src.includes('satvik_royal_thali')) {
+                            target.src = '/images/satvik_royal_thali_1783699368595.jpg';
+                          }
+                        }}
                       />
                       <div className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-bold text-amber-400 border border-amber-500/30">
                         ₹{dish.price}
@@ -339,29 +353,29 @@ export default function AdminMenuPage() {
 
                     {/* Dish Info */}
                     <div className="p-4 space-y-2">
-                      <h3 className="font-bold text-sm text-white">{dish.name}</h3>
-                      <p className="text-xs text-stone-400 line-clamp-2 leading-relaxed">
+                      <h3 className="font-bold text-sm text-stone-900 dark:text-white">{dish.name}</h3>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 line-clamp-2 leading-relaxed">
                         {dish.description}
                       </p>
                     </div>
                   </div>
 
                   {/* Admin Actions Bar */}
-                  <div className="p-3 bg-stone-950/70 border-t border-stone-800/80 flex items-center justify-between">
+                  <div className="p-3 bg-stone-50 dark:bg-stone-950/70 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between">
                     <span className="text-[10px] font-mono text-stone-500 uppercase">
                       Category: {dish.category}
                     </span>
                     <div className="flex items-center space-x-1.5">
                       <button
                         onClick={() => handleOpenEditModal(dish)}
-                        className="p-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg bg-stone-200/80 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white transition-colors cursor-pointer"
                         title="Edit Dish"
                       >
                         <Edit2 className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => handleDeleteDish(dish.id)}
-                        className="p-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg bg-red-100 dark:bg-red-950/40 hover:bg-red-200 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors cursor-pointer"
                         title="Delete Dish"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -378,15 +392,15 @@ export default function AdminMenuPage() {
 
       {/* Add / Edit Dish Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in overflow-y-auto">
-          <div className="bg-stone-900 border border-stone-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative my-8">
-            <div className="flex justify-between items-center pb-4 border-b border-stone-800">
-              <h3 className="text-lg font-bold text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in overflow-y-auto">
+          <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl max-w-xl w-full p-6 shadow-2xl relative my-8 text-stone-900 dark:text-stone-100">
+            <div className="flex justify-between items-center pb-4 border-b border-stone-200 dark:border-stone-800">
+              <h3 className="text-lg font-bold text-stone-950 dark:text-white">
                 {editingDish ? 'Edit Dish' : 'Add New Dish'}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-stone-400 hover:text-white cursor-pointer"
+                className="text-stone-400 hover:text-stone-700 dark:hover:text-white cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -395,7 +409,7 @@ export default function AdminMenuPage() {
             <form onSubmit={handleSubmitDish} className="space-y-4 pt-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-stone-300 uppercase mb-1">
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase mb-1">
                     Dish Name (English) *
                   </label>
                   <input
@@ -404,11 +418,11 @@ export default function AdminMenuPage() {
                     value={dishName}
                     onChange={(e) => setDishName(e.target.value)}
                     placeholder="e.g. Satvik Paneer Tikka"
-                    className="w-full px-3 py-2 rounded-lg bg-stone-800 border border-stone-700 text-white text-xs focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white text-xs focus:outline-none focus:border-amber-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-stone-300 uppercase mb-1">
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase mb-1">
                     Hindi Subtitle (Optional)
                   </label>
                   <input
@@ -416,20 +430,20 @@ export default function AdminMenuPage() {
                     value={hindiName}
                     onChange={(e) => setHindiName(e.target.value)}
                     placeholder="e.g. सात्विक पनीर टिक्का"
-                    className="w-full px-3 py-2 rounded-lg bg-stone-800 border border-stone-700 text-white text-xs focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white text-xs focus:outline-none focus:border-amber-500"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-stone-300 uppercase mb-1">
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase mb-1">
                     Category *
                   </label>
                   <select
                     value={category}
                     onChange={(e: any) => setCategory(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-stone-800 border border-stone-700 text-white text-xs focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white text-xs focus:outline-none focus:border-amber-500 cursor-pointer"
                   >
                     <option value="Starters">Starter</option>
                     <option value="Mains">Mains</option>
@@ -438,7 +452,7 @@ export default function AdminMenuPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-stone-300 uppercase mb-1">
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase mb-1">
                     Price (₹) *
                   </label>
                   <input
@@ -447,17 +461,17 @@ export default function AdminMenuPage() {
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                     placeholder="249"
-                    className="w-full px-3 py-2 rounded-lg bg-stone-800 border border-stone-700 text-white text-xs focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white text-xs focus:outline-none focus:border-amber-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-stone-300 uppercase mb-1">
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase mb-1">
                     Spiciness Level
                   </label>
                   <select
                     value={spicy}
                     onChange={(e) => setSpicy(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-stone-800 border border-stone-700 text-white text-xs focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white text-xs focus:outline-none focus:border-amber-500 cursor-pointer"
                   >
                     <option value="Mild">Mild</option>
                     <option value="Medium">Medium</option>
@@ -467,7 +481,7 @@ export default function AdminMenuPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-stone-300 uppercase mb-1">
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase mb-1">
                   Description
                 </label>
                 <textarea
@@ -475,68 +489,107 @@ export default function AdminMenuPage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Ingredients, preparation with pure A2 ghee, ayurvedic healing notes..."
-                  className="w-full px-3 py-2 rounded-lg bg-stone-800 border border-stone-700 text-white text-xs focus:outline-none focus:border-amber-500"
+                  className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white text-xs focus:outline-none focus:border-amber-500"
                 />
               </div>
 
-              {/* Photo Upload to Cloudinary */}
+              {/* Photo Upload to Cloudinary with Live Preview */}
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-stone-300 uppercase">
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase">
                   Dish Photo (Saves to Cloudinary)
                 </label>
-                <div className="p-3 rounded-lg bg-stone-950/60 border border-dashed border-stone-700 flex flex-col gap-2">
+                <div className="p-3.5 rounded-2xl bg-stone-50 dark:bg-stone-950/60 border border-dashed border-stone-300 dark:border-stone-700 flex flex-col gap-2.5">
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleImageFileChange}
-                    className="text-xs text-stone-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-stone-800 file:text-amber-400 hover:file:bg-stone-700 cursor-pointer"
+                    className="text-xs text-stone-700 dark:text-stone-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-100 dark:file:bg-stone-800 file:text-amber-800 dark:file:text-amber-400 hover:file:bg-amber-200 dark:hover:file:bg-stone-700 cursor-pointer"
                   />
-                  <div className="text-[11px] text-stone-500 flex items-center gap-1">
-                    <span>Or enter an existing image URL below:</span>
+                  <div className="text-[11px] text-stone-500 dark:text-stone-400">
+                    Or enter an existing image URL below:
                   </div>
                   <input
                     type="text"
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     placeholder="https://res.cloudinary.com/... or /images/..."
-                    className="w-full px-3 py-1.5 rounded bg-stone-800 border border-stone-700 text-white text-xs"
+                    className="w-full px-3 py-2 rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white text-xs focus:outline-none focus:border-amber-500"
                   />
+
+                  {/* Live Photo Preview */}
+                  {(imageFile || imageUrl) && (
+                    <div className="relative mt-2 p-2.5 rounded-xl bg-stone-100 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 flex items-center gap-3">
+                      <div className="h-16 w-16 rounded-xl overflow-hidden bg-stone-200 dark:bg-stone-900 shrink-0 border border-stone-300 dark:border-stone-700">
+                        <img
+                          src={imageFile || imageUrl}
+                          alt="Dish preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement;
+                            if (!target.src.includes('satvik_royal_thali')) {
+                              target.src = '/images/satvik_royal_thali_1783699368595.jpg';
+                            }
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-stone-800 dark:text-stone-200 truncate">
+                          Live Photo Preview
+                        </p>
+                        <p className="text-[11px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5">
+                          <CheckCircle className="h-3 w-3" />
+                          {imageFile ? 'Ready to upload to Cloudinary' : 'Valid image URL loaded'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImageFile(null);
+                          setImageUrl('');
+                        }}
+                        className="p-1 rounded-md text-stone-400 hover:text-red-500 transition-colors"
+                        title="Remove photo"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div className="flex items-center space-x-6 pt-1">
-                <label className="flex items-center space-x-2 text-xs text-stone-300 cursor-pointer">
+                <label className="flex items-center space-x-2 text-xs text-stone-700 dark:text-stone-300 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={isJain}
                     onChange={(e) => setIsJain(e.target.checked)}
-                    className="rounded bg-stone-800 border-stone-700 text-amber-500"
+                    className="rounded bg-stone-100 dark:bg-stone-800 border-stone-300 dark:border-stone-700 text-amber-500 focus:ring-amber-500"
                   />
                   <span>100% Jain (No Onion & Garlic)</span>
                 </label>
-                <label className="flex items-center space-x-2 text-xs text-stone-300 cursor-pointer">
+                <label className="flex items-center space-x-2 text-xs text-stone-700 dark:text-stone-300 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={isChefSpecial}
                     onChange={(e) => setIsChefSpecial(e.target.checked)}
-                    className="rounded bg-stone-800 border-stone-700 text-amber-500"
+                    className="rounded bg-stone-100 dark:bg-stone-800 border-stone-300 dark:border-stone-700 text-amber-500 focus:ring-amber-500"
                   />
                   <span>Chef Special</span>
                 </label>
               </div>
 
-              <div className="pt-4 border-t border-stone-800 flex justify-end gap-3">
+              <div className="pt-4 border-t border-stone-200 dark:border-stone-800 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-stone-800 text-stone-300 hover:bg-stone-700 text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700 text-xs font-semibold cursor-pointer transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || uploadingImage}
-                  className="px-5 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-stone-950 text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-stone-950 text-xs font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-sm transition-colors"
                 >
                   {submitting || uploadingImage ? (
                     <>

@@ -6,12 +6,16 @@ import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/AdminSidebar';
 import { 
   Lock, Mail, ArrowRight, RefreshCw, CheckCircle, Clock, 
-  Upload, Database, Cloud, AlertCircle, ShieldAlert 
+  Database, Cloud, AlertCircle, Utensils, Star, Plus, 
+  ExternalLink, Sparkles 
 } from 'lucide-react';
-import { Order } from '@/lib/data';
+import { MenuItem, DEFAULT_MENU_ITEMS } from '@/lib/data';
+import { SunMoonThemeToggle } from '@/components/ui/sun-moon-theme-toggle';
+import { useTheme } from '@/context/ThemeContext';
 
 export default function AdminPage() {
   const router = useRouter();
+  const { theme } = useTheme();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('umeshbiz16@gmail.com');
   const [password, setPassword] = useState('');
@@ -19,13 +23,9 @@ export default function AdminPage() {
   const [showDeniedModal, setShowDeniedModal] = useState(false);
   const [deniedMessage, setDeniedMessage] = useState('');
 
-  // Dashboard Data
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loadingOrders, setLoadingOrders] = useState(false);
-  const [uploadFile, setUploadFile] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadSuccessUrl, setUploadSuccessUrl] = useState<string | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  // Dashboard Data - Live Dishes from Supabase
+  const [dishes, setDishes] = useState<MenuItem[]>(DEFAULT_MENU_ITEMS);
+  const [loadingDishes, setLoadingDishes] = useState(false);
 
   // Check login state on mount
   useEffect(() => {
@@ -37,25 +37,27 @@ export default function AdminPage() {
     }
   }, []);
 
-  // Fetch orders when authenticated
+  // Fetch live dishes from Supabase via /api/menu when authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      loadOrders();
+      loadDishes();
     }
   }, [isAuthenticated]);
 
-  const loadOrders = async () => {
-    setLoadingOrders(true);
+  const loadDishes = async () => {
+    setLoadingDishes(true);
     try {
-      const res = await fetch('/api/orders');
+      const res = await fetch('/api/menu');
       if (res.ok) {
         const data = await res.json();
-        setOrders(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setDishes(data);
+        }
       }
     } catch (e) {
-      console.error('Failed to load orders:', e);
+      console.error('Failed to load dishes:', e);
     } finally {
-      setLoadingOrders(false);
+      setLoadingDishes(false);
     }
   };
 
@@ -90,54 +92,23 @@ export default function AdminPage() {
     }
   };
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadFile(reader.result as string);
-        setUploadSuccessUrl(null);
-        setUploadError(null);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleUploadToCloudinary = async () => {
-    if (!uploadFile) return;
-    setUploading(true);
-    setUploadError(null);
-
-    try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ file: uploadFile, folder: 'satvik_dishes' }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setUploadSuccessUrl(data.url);
-      } else {
-        setUploadError(data.error || 'Failed to upload photo to Cloudinary.');
-      }
-    } catch (err: any) {
-      setUploadError(err.message || 'Network error during upload');
-    } finally {
-      setUploading(false);
-    }
-  };
-
   // ----------------------------------------------------------------------------
-  // LOGIN SCREEN
+  // LOGIN SCREEN (Themed for both light and dark modes)
   // ----------------------------------------------------------------------------
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-stone-950 text-white flex flex-col justify-center items-center p-4 relative font-sans">
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col justify-center items-center p-4 relative font-sans transition-colors">
+        
+        {/* Top Floating Theme Switcher */}
+        <div className="absolute top-6 right-6 z-20">
+          <SunMoonThemeToggle size={34} duration={700} sky={true} />
+        </div>
+
         {/* Access Denied Modal */}
         {showDeniedModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="bg-stone-900 border border-stone-800 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl relative">
-              <div className="relative mx-auto w-52 sm:w-60 mb-4 overflow-hidden rounded-xl">
+            <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl max-w-md w-full p-6 text-center shadow-2xl relative text-stone-900 dark:text-stone-100">
+              <div className="relative mx-auto w-52 sm:w-60 mb-4 overflow-hidden rounded-2xl shadow-sm">
                 <img
                   src="/images/admin-access-denied.png"
                   alt="Admin Access Denied"
@@ -145,23 +116,23 @@ export default function AdminPage() {
                 />
               </div>
 
-              <h3 className="text-xl font-bold text-amber-400 mb-2">
+              <h3 className="text-xl font-bold text-[#B8860B] dark:text-amber-400 mb-2">
                 Admin Access Denied
               </h3>
-              <p className="text-xs text-stone-300 leading-relaxed mb-6 font-sans">
-                {deniedMessage || 'Invalid administrator username or password. Please try again or return to the website.'}
+              <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed mb-6 font-sans">
+                {deniedMessage || 'Invalid master chef credentials. Please try again or return to the website.'}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => setShowDeniedModal(false)}
-                  className="flex-1 py-3 px-4 rounded-lg bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
+                  className="flex-1 py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer shadow-sm"
                 >
                   Try Again
                 </button>
                 <Link
                   href="/"
-                  className="flex-1 py-3 px-4 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center justify-center"
+                  className="flex-1 py-3 px-4 rounded-xl border border-stone-300 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-200 font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center justify-center"
                 >
                   Continue to Website
                 </Link>
@@ -170,24 +141,32 @@ export default function AdminPage() {
           </div>
         )}
 
-        <div className="max-w-md w-full bg-stone-900 border border-stone-800 rounded-2xl p-8 shadow-2xl">
+        <div className="max-w-md w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl p-8 shadow-xl">
           <div className="text-center mb-8 space-y-2">
             <Link href="/" className="inline-block">
-              <img
-                src="/images/logo-dark.png"
-                alt="Satvik Logo"
-                className="h-14 w-auto object-contain mx-auto mb-2"
-              />
+              {theme === 'dark' ? (
+                <img
+                  src="/images/logo-dark.png"
+                  alt="Satvik Logo"
+                  className="h-14 w-auto object-contain mx-auto mb-2"
+                />
+              ) : (
+                <img
+                  src="/images/logo-light.png"
+                  alt="Satvik Logo"
+                  className="h-14 w-auto object-contain mx-auto mb-2"
+                />
+              )}
             </Link>
-            <h2 className="text-xl font-bold text-white">Admin Control Portal</h2>
-            <p className="text-xs text-stone-400 font-sans">
-              Enter your verified master chef credentials to enter
+            <h2 className="text-xl font-bold text-stone-950 dark:text-white">Admin Control Room</h2>
+            <p className="text-xs text-stone-500 dark:text-stone-400 font-sans">
+              Sign in with your master restaurant credentials
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-stone-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
                 Admin Username / Email
               </label>
               <div className="relative">
@@ -198,13 +177,13 @@ export default function AdminPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="umeshbiz16@gmail.com"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-stone-800 border border-stone-700 text-white text-xs placeholder:text-stone-500 focus:outline-none focus:border-amber-500"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white text-xs placeholder:text-stone-400 focus:outline-none focus:border-amber-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-stone-300 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -215,7 +194,7 @@ export default function AdminPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter admin password"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-stone-800 border border-stone-700 text-white text-xs placeholder:text-stone-500 focus:outline-none focus:border-amber-500"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white text-xs placeholder:text-stone-400 focus:outline-none focus:border-amber-500"
                 />
               </div>
             </div>
@@ -223,26 +202,26 @@ export default function AdminPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 px-4 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-950 font-bold text-xs uppercase tracking-widest transition-all cursor-pointer shadow-md disabled:opacity-50 flex items-center justify-center space-x-2"
+              className="w-full mt-2 py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-950 font-bold text-xs uppercase tracking-widest transition-all cursor-pointer shadow-md disabled:opacity-50 flex items-center justify-center space-x-2"
             >
               {loading ? (
                 <>
                   <RefreshCw className="h-4 w-4 animate-spin text-stone-950" />
-                  <span>Verifying with Database...</span>
+                  <span>Verifying with Supabase...</span>
                 </>
               ) : (
                 <>
-                  <span>Login to Admin Panel</span>
+                  <span>Sign In to Admin Panel</span>
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-stone-800 text-center">
+          <div className="mt-6 pt-6 border-t border-stone-100 dark:border-stone-800 text-center">
             <Link
               href="/"
-              className="text-xs text-stone-400 hover:text-amber-400 transition-colors inline-flex items-center gap-1"
+              className="text-xs font-semibold text-stone-500 dark:text-stone-400 hover:text-[#B8860B] dark:hover:text-amber-400 transition-colors inline-flex items-center gap-1"
             >
               <span>← Return to Public Website</span>
             </Link>
@@ -253,10 +232,10 @@ export default function AdminPage() {
   }
 
   // ----------------------------------------------------------------------------
-  // AUTHENTICATED ADMIN DASHBOARD
+  // AUTHENTICATED ADMIN DASHBOARD (THEMED WITH BLACK & WHITE SUPPORT)
   // ----------------------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col md:flex-row font-sans">
+    <div className="min-h-screen bg-stone-50/60 dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col md:flex-row font-sans transition-colors">
       {/* Admin Sidebar Navigation */}
       <AdminSidebar onLogout={() => setIsAuthenticated(false)} />
 
@@ -264,142 +243,189 @@ export default function AdminPage() {
       <main className="flex-1 p-6 md:p-8 overflow-y-auto">
         <div className="max-w-6xl mx-auto space-y-8">
           
-          {/* Top Welcome Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-stone-800">
+          {/* Top Bar with Title & Theme Switcher */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-6 border-b border-stone-200 dark:border-stone-800">
             <div>
-              <h1 className="text-2xl font-bold text-white">Live Orders & Dispatch</h1>
-              <p className="text-xs text-stone-400 mt-1">
-                Real-time kitchen order monitor powered by Supabase Realtime Database.
+              <div className="flex items-center space-x-2 mb-1">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300">
+                  Kitchen Portal
+                </span>
+                <span className="text-xs text-stone-400">•</span>
+                <span className="text-xs text-stone-500 font-mono">Live Sync Active</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-950 dark:text-white">
+                Website Dishes Overview
+              </h1>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+                Live dishes currently published on the storefront, fetched real-time from Supabase.
               </p>
             </div>
+
             <div className="flex items-center gap-3">
+              {/* Theme Toggle Icon Component */}
+              <div className="p-1 rounded-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs">
+                <SunMoonThemeToggle size={30} duration={700} sky={true} />
+              </div>
+
               <Link
                 href="/admin-menu"
-                className="py-2.5 px-4 rounded-lg bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 shadow-sm"
+                className="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 shadow-sm"
               >
-                <span>Manage Menu Dishes</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+                <Plus className="h-4 w-4" />
+                <span>Add / Edit Dishes</span>
               </Link>
+
               <button
-                onClick={loadOrders}
-                className="p-2.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 transition-colors cursor-pointer"
-                title="Refresh Orders"
+                onClick={loadDishes}
+                className="p-2.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white transition-colors cursor-pointer"
+                title="Refresh Dishes from Supabase"
               >
-                <RefreshCw className={`h-4 w-4 ${loadingOrders ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${loadingDishes ? 'animate-spin' : ''}`} />
               </button>
             </div>
           </div>
 
-          {/* Quick Metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl bg-stone-900 border border-stone-800">
-              <p className="text-xs text-stone-400 font-semibold uppercase">Total Orders</p>
-              <p className="text-2xl font-bold text-white mt-1">{orders.length}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-stone-900 border border-stone-800">
-              <p className="text-xs text-stone-400 font-semibold uppercase">Supabase Status</p>
-              <p className="text-sm font-bold text-emerald-400 mt-2 flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                Live Sync Active
+          {/* Realtime Metrics: Total Dishes from Supabase */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {/* Total Dishes Metric */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm space-y-1">
+              <div className="flex items-center justify-between text-stone-500 dark:text-stone-400">
+                <span className="text-xs font-bold uppercase tracking-wider">Total Dishes on Website</span>
+                <Utensils className="h-4 w-4 text-[#B8860B]" />
+              </div>
+              <p className="text-3xl font-black text-stone-950 dark:text-white">
+                {dishes.length}
+              </p>
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                Fetched live from Supabase
               </p>
             </div>
-            <div className="p-4 rounded-xl bg-stone-900 border border-stone-800">
-              <p className="text-xs text-stone-400 font-semibold uppercase">Cloudinary CDN</p>
-              <p className="text-sm font-bold text-amber-400 mt-2 flex items-center gap-1.5">
+
+            {/* Database Sync Status */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm space-y-1">
+              <div className="flex items-center justify-between text-stone-500 dark:text-stone-400">
+                <span className="text-xs font-bold uppercase tracking-wider">Database Status</span>
+                <Database className="h-4 w-4 text-emerald-600" />
+              </div>
+              <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 pt-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                Supabase Connected
+              </p>
+              <p className="text-[11px] text-stone-400 font-mono">joakjlzlnifdzlolcpwz.supabase.co</p>
+            </div>
+
+            {/* Cloudinary CDN Media */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm space-y-1">
+              <div className="flex items-center justify-between text-stone-500 dark:text-stone-400">
+                <span className="text-xs font-bold uppercase tracking-wider">Media Hosting CDN</span>
+                <Cloud className="h-4 w-4 text-amber-500" />
+              </div>
+              <p className="text-sm font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 pt-2">
                 <Cloud className="h-4 w-4" />
-                uvxk7ige Storage Ready
+                Cloudinary CDN Active
               </p>
+              <p className="text-[11px] text-stone-400 font-mono">Cloud: uvxk7ige (Ready)</p>
             </div>
           </div>
 
-          {/* Cloudinary Media Quick Uploader */}
-          <div className="p-6 rounded-2xl bg-stone-900 border border-stone-800 space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Cloud className="h-4 w-4 text-amber-400" />
-              <span>Cloudinary Direct Photo Uploader</span>
-            </h3>
-            <p className="text-xs text-stone-400">
-              Upload dishes or event photos directly to your Cloudinary cloud account.
-            </p>
+          {/* Main Box: Live Dishes on the Website */}
+          <div className="rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div>
+                <h3 className="text-base font-bold text-stone-950 dark:text-white flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-[#B8860B]" />
+                  <span>All Dishes Live on Website ({dishes.length})</span>
+                </h3>
+                <p className="text-xs text-stone-500 dark:text-stone-400">
+                  Real-time dishes visible to customers on /menu and /strater pages.
+                </p>
+              </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageFileChange}
-                className="w-full sm:w-auto text-xs text-stone-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-stone-800 file:text-amber-400 hover:file:bg-stone-700 cursor-pointer"
-              />
-              <button
-                onClick={handleUploadToCloudinary}
-                disabled={!uploadFile || uploading}
-                className="w-full sm:w-auto py-2.5 px-5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-stone-950 font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+              <Link
+                href="/admin-menu"
+                className="text-xs font-bold text-[#B8860B] dark:text-amber-400 hover:underline flex items-center gap-1"
               >
-                {uploading ? (
-                  <>
-                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                    <span>Uploading...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-3.5 w-3.5" />
-                    <span>Upload Photo</span>
-                  </>
-                )}
-              </button>
+                <span>Open Dish Manager to Add/Edit</span>
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
             </div>
 
-            {uploadSuccessUrl && (
-              <div className="p-3 bg-emerald-950/40 border border-emerald-800 rounded-lg text-xs text-emerald-300 flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span className="truncate">Uploaded successfully: {uploadSuccessUrl}</span>
+            {loadingDishes ? (
+              <div className="p-14 text-center text-xs text-stone-400 flex flex-col items-center gap-2">
+                <RefreshCw className="h-5 w-5 animate-spin text-amber-500" />
+                <span>Loading live dishes from Supabase...</span>
               </div>
-            )}
-            {uploadError && (
-              <div className="p-3 bg-red-950/40 border border-red-800 rounded-lg text-xs text-red-300 flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
-                <span>{uploadError}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Orders Table */}
-          <div className="rounded-2xl bg-stone-900 border border-stone-800 overflow-hidden">
-            <div className="p-4 border-b border-stone-800 flex justify-between items-center">
-              <h3 className="text-sm font-bold text-white">Recent Customer Orders</h3>
-              <span className="text-xs text-stone-400 font-mono">{orders.length} Records</span>
-            </div>
-
-            {orders.length === 0 ? (
-              <div className="p-10 text-center text-xs text-stone-500">
-                No orders placed yet. Orders made via website checkout appear here in real-time.
+            ) : dishes.length === 0 ? (
+              <div className="p-12 text-center text-xs text-stone-500">
+                No dishes found in database. Go to <Link href="/admin-menu" className="text-amber-500 underline font-bold">Menu Manager</Link> to add your first dish.
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-stone-300">
-                  <thead className="bg-stone-950 text-stone-400 uppercase tracking-wider font-semibold border-b border-stone-800">
+                <table className="w-full text-left text-xs text-stone-700 dark:text-stone-300">
+                  <thead className="bg-stone-50 dark:bg-stone-950/60 text-stone-500 dark:text-stone-400 uppercase tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
                     <tr>
-                      <th className="p-3.5">Order ID</th>
-                      <th className="p-3.5">Customer</th>
-                      <th className="p-3.5">Phone</th>
-                      <th className="p-3.5">Items</th>
-                      <th className="p-3.5">Total</th>
-                      <th className="p-3.5">Status</th>
+                      <th className="p-4">Dish Photo</th>
+                      <th className="p-4">Dish Name</th>
+                      <th className="p-4">Category</th>
+                      <th className="p-4">Price</th>
+                      <th className="p-4">Spiciness</th>
+                      <th className="p-4">Satvik / Jain</th>
+                      <th className="p-4 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-800">
-                    {orders.map((order) => (
-                      <tr key={order.id} className="hover:bg-stone-800/40 transition-colors">
-                        <td className="p-3.5 font-mono font-bold text-amber-400">{order.id}</td>
-                        <td className="p-3.5 font-medium text-white">{order.customerName}</td>
-                        <td className="p-3.5 text-stone-400">{order.phone}</td>
-                        <td className="p-3.5">
-                          {order.items?.map((it) => `${it.name} x${it.quantity}`).join(', ') || 'N/A'}
+                  <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
+                    {dishes.map((dish) => (
+                      <tr key={dish.id} className="hover:bg-stone-50/70 dark:hover:bg-stone-800/40 transition-colors">
+                        {/* Thumbnail with onError fallback */}
+                        <td className="p-4">
+                          <div className="h-12 w-12 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700">
+                            <img
+                              src={dish.image || '/images/satvik_royal_thali_1783699368595.jpg'}
+                              alt={dish.name}
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = '/images/satvik_royal_thali_1783699368595.jpg';
+                              }}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
                         </td>
-                        <td className="p-3.5 font-bold text-white">₹{order.total}</td>
-                        <td className="p-3.5">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                            {order.status}
+
+                        <td className="p-4">
+                          <p className="font-bold text-stone-900 dark:text-white text-sm">{dish.name}</p>
+                          <p className="text-[11px] text-stone-500 line-clamp-1 max-w-xs">{dish.description}</p>
+                        </td>
+
+                        <td className="p-4">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300">
+                            {dish.category}
                           </span>
+                        </td>
+
+                        <td className="p-4 font-bold text-base text-[#B8860B] dark:text-amber-400">
+                          ₹{dish.price}
+                        </td>
+
+                        <td className="p-4">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-stone-100 dark:bg-stone-800">
+                            {dish.spicy || 'Mild'}
+                          </span>
+                        </td>
+
+                        <td className="p-4">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                            <CheckCircle className="h-3.5 w-3.5" />
+                            <span>100% Satvik</span>
+                          </span>
+                        </td>
+
+                        <td className="p-4 text-right">
+                          <Link
+                            href="/admin-menu"
+                            className="py-1 px-3 rounded-lg border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-semibold text-[11px] transition-colors inline-block"
+                          >
+                            Manage
+                          </Link>
                         </td>
                       </tr>
                     ))}

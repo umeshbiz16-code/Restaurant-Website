@@ -90,8 +90,12 @@ export default function DishDetailPage() {
           {/* Photo */}
           <div className="relative rounded-2xl overflow-hidden bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xl h-80 sm:h-96">
             <img
-              src={dish.image}
+              src={dish.image || '/images/satvik_royal_thali_1783699368595.jpg'}
               alt={dish.name}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/images/satvik_royal_thali_1783699368595.jpg';
+              }}
               className="w-full h-full object-cover"
             />
             <div className="absolute top-4 left-4 bg-white/95 dark:bg-stone-950/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-amber-900 dark:text-amber-300 shadow-sm flex items-center gap-1.5">
@@ -222,8 +226,12 @@ export default function DishDetailPage() {
                   <div>
                     <div className="h-40 w-full rounded-xl overflow-hidden mb-3 bg-stone-100 dark:bg-stone-800">
                       <img
-                        src={rel.image}
+                        src={rel.image || '/images/satvik_royal_thali_1783699368595.jpg'}
                         alt={rel.name}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = '/images/satvik_royal_thali_1783699368595.jpg';
+                        }}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
