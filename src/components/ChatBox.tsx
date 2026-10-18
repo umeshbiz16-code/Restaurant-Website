@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect, useRef } from "react";
 import { MessageSquare, X, Send, Sparkles, Smile, MessageCircle } from "lucide-react";
 import { ChatMessage } from "../types";

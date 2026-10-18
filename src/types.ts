@@ -3,11 +3,12 @@ export interface MenuItem {
   name: string;
   description: string;
   price: number;
-  category: "Starters" | "Mains" | "Sweets" | "Catering";
+  category: string;
   image: string;
-  spicy: "Mild" | "Medium" | "Hot" | "Sweet" | "Customizable";
+  spicy: string;
   rating: number;
   reviews: number;
+  available?: boolean;
 }
 
 export interface CartItem extends MenuItem {
