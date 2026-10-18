@@ -1,16 +1,17 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { ThemeProvider } from '@/context/ThemeContext';
 
 export const metadata: Metadata = {
-  title: 'Satvik Caters and Events',
-  description: 'A premium catering and food ordering website with real-time order tracking, event planning, payment simulation, and a dedicated AI culinary helper.',
+  title: 'Satvik Caters and Events | Pure Vegetarian Catering & Dining',
+  description: 'Pure traditional Indian vegetarian cuisine and luxury catering for weddings, corporate meets, satsangs, and sacred celebrations in Bhopal.',
   metadataBase: new URL('https://satvikcatersandevents.com'),
   alternates: {
     canonical: 'https://satvikcatersandevents.com/',
   },
   openGraph: {
     title: 'Satvik Caters and Events',
-    description: 'A premium catering and food ordering website with real-time order tracking, event planning, payment simulation, and a dedicated AI culinary helper.',
+    description: 'Pure vegetarian luxury catering and dining services for celebrations, corporate meets, and sacred rituals in Bhopal.',
     url: 'https://satvikcatersandevents.com/',
     type: 'website',
   },
@@ -54,7 +55,9 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased min-h-screen">
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

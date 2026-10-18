@@ -14,7 +14,7 @@ interface CartDrawerProps {
   onUpdateQuantity: (id: string, newQty: number) => void;
   onRemoveItem: (id: string) => void;
   onOrderSuccess: (order: Order) => void;
-  onTrackOrderClick: (orderId: string) => void;
+  onTrackOrderClick?: (orderId: string) => void;
 }
 
 export default function CartDrawer({
@@ -530,7 +530,7 @@ export default function CartDrawer({
                 <div className="flex flex-col gap-2.5 w-full">
                   <button
                     onClick={() => {
-                      onTrackOrderClick(placedOrder.id);
+                      if (onTrackOrderClick) onTrackOrderClick(placedOrder.id);
                       handleReset();
                     }}
                     className="w-full rounded-none bg-[#D4AF37] hover:bg-[#B8962E] py-3.5 text-xs font-bold uppercase tracking-widest text-black flex items-center justify-center space-x-2"

@@ -59,6 +59,7 @@ export interface Order {
 }
 
 export const DEFAULT_MENU_ITEMS: MenuItem[] = [
+
   {
     id: "m1",
     name: "Maharaja Satvik Thali",
@@ -395,3 +396,6 @@ export const updateOrderStatus = (order: Order): Order["status"] => {
   if (elapsedSeconds >= 20) return "Chef Preparing";
   return "Placed";
 };
+
+export const MENU_ITEMS = DEFAULT_MENU_ITEMS;
+
