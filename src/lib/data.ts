@@ -340,66 +340,10 @@ export const DEFAULT_KILO_DISHES: KiloDish[] = [
 // Global in-memory cache for orders (survives across requests in Node runtime)
 const globalOrdersMap = new Map<string, Order>();
 
-// Seed sample orders
-const seedOrder1: Order = {
-  id: "SATVIK-783612",
-  customerName: "Aarav Mehta",
-  email: "aarav.mehta@example.com",
-  phone: "9876543210",
-  address: "Apartment 4B, Shanti Enclave, Bhopal",
-  items: [
-    { id: "m1", name: "Maharaja Satvik Thali", price: 349, quantity: 2, category: "Mains" },
-    { id: "m7", name: "Saffron Rasgulla Plate", price: 129, quantity: 1, category: "Sweets" }
-  ],
-  subtotal: 827,
-  deliveryCharge: 0,
-  tax: 41,
-  total: 868,
-  status: "Chef Preparing",
-  paymentMethod: "UPI",
-  paymentStatus: "Paid",
-  transactionId: "TXN-SEED9812A",
-  createdAt: Date.now() - 35 * 1000,
-  estimatedDeliveryAt: Date.now() + 20 * 60 * 1000,
-  specialInstructions: "Please deliver near the main entrance gate."
-};
-
-const seedOrder2: Order = {
-  id: "SATVIK-412953",
-  customerName: "Sonia Sharma",
-  email: "sonia@example.com",
-  phone: "9123456789",
-  address: "Villa 12, Lotus Greens, Bhopal",
-  items: [
-    { id: "cat1", name: "Satsang & Puja Buffet Package", price: 499, quantity: 1, category: "Catering" }
-  ],
-  subtotal: 14970,
-  deliveryCharge: 1500,
-  tax: 749,
-  total: 17219,
-  status: "Placed",
-  paymentMethod: "Card",
-  paymentStatus: "Paid",
-  transactionId: "TXN-SEED2410B",
-  createdAt: Date.now() - 5 * 1000,
-  estimatedDeliveryAt: Date.now() + 86400 * 1000,
-  eventType: "Ganesh Puja",
-  guestCount: 30,
-  specialInstructions: "Aesthetic traditional flower decorations needed."
-};
-
-globalOrdersMap.set(seedOrder1.id, seedOrder1);
-globalOrdersMap.set(seedOrder2.id, seedOrder2);
-
 export const memoryOrders = globalOrdersMap;
 
 export const updateOrderStatus = (order: Order): Order["status"] => {
-  const elapsedSeconds = (Date.now() - order.createdAt) / 1000;
-  if (elapsedSeconds >= 120) return "Delivered";
-  if (elapsedSeconds >= 80) return "Out for Delivery";
-  if (elapsedSeconds >= 50) return "Quality Check";
-  if (elapsedSeconds >= 20) return "Chef Preparing";
-  return "Placed";
+  return order.status || "Placed";
 };
 
 export const MENU_ITEMS = DEFAULT_MENU_ITEMS;

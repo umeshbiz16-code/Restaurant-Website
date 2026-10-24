@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { memoryOrders, updateOrderStatus } from '@/lib/data';
+import { memoryOrders } from '@/lib/data';
 import { supabaseAdmin, supabase } from '@/lib/supabase';
 
 export async function GET() {
@@ -11,7 +11,7 @@ export async function GET() {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (!error && data && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         const mapped = data.map((d: any) => ({
           id: d.id,
           customerName: d.customer_name,
@@ -39,18 +39,11 @@ export async function GET() {
         return NextResponse.json(mapped);
       }
     } catch (e) {
-      console.warn('Supabase fetch orders error, falling back to memoryOrders:', e);
+      console.warn('Supabase fetch orders error:', e);
     }
   }
 
-  const allOrders = Array.from(memoryOrders.values()).map(order => {
-    return {
-      ...order,
-      gatewayMode: (order as any).gatewayMode || 'test',
-      razorpayPaymentId: (order as any).razorpayPaymentId || order.transactionId,
-      specialInstructions: order.specialInstructions,
-    };
-  });
-
-  return NextResponse.json(allOrders);
+  // Only return real runtime placed orders (no demo/mock seed data)
+  const runtimeOrders = Array.from(memoryOrders.values());
+  return NextResponse.json(runtimeOrders);
 }

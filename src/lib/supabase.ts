@@ -188,8 +188,30 @@ export async function saveOrderToSupabase(order: any): Promise<boolean> {
       ]);
 
     if (error) {
-      console.warn('Failed to insert order into Supabase:', error.message);
-      return false;
+      console.warn('Initial insert into orders failed, trying base columns fallback:', error.message);
+      const basePayload = {
+        id: order.id,
+        customer_name: order.customerName,
+        phone: order.phone,
+        email: order.email || null,
+        address: order.address,
+        items: order.items,
+        subtotal: order.subtotal,
+        delivery_charge: order.deliveryCharge || 0,
+        tax: order.tax || 0,
+        total: order.total,
+        status: order.status || 'Placed',
+        payment_method: order.paymentMethod || 'Razorpay',
+        payment_status: order.paymentStatus || 'Paid',
+        special_instructions: order.specialInstructions || null,
+        created_at: new Date(order.createdAt || Date.now()).toISOString()
+      };
+      const { error: fallbackError } = await client!.from('orders').insert([basePayload]);
+      if (fallbackError) {
+        console.error('Base fallback insert error:', fallbackError.message);
+        return false;
+      }
+      return true;
     }
     return true;
   } catch (err) {

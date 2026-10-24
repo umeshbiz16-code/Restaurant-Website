@@ -35,6 +35,10 @@ export default function CartPage() {
   const [placedOrder, setPlacedOrder] = useState<any | null>(null);
   const [whatsappLink, setWhatsappLink] = useState<string>('');
 
+  // Validate form completeness before enabling payment
+  const cleanPhone = phone.replace(/\D/g, '');
+  const isFormValid = customerName.trim().length >= 2 && cleanPhone.length >= 10 && address.trim().length >= 4;
+
   // --------------------------------------------------------------------------
   // RAZORPAY PAYMENT GATEWAY TRIGGER
   // --------------------------------------------------------------------------
@@ -561,11 +565,15 @@ export default function CartPage() {
                     </div>
                   </div>
 
-                  {/* Place Order Button - BLUE AMAZON STYLE */}
+                  {/* Pay Button - BLUE AMAZON STYLE (Requires full form completion) */}
                   <button
                     onClick={handlePlaceOrder}
-                    disabled={submitting}
-                    className="w-full mt-4 py-3.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                    disabled={!isFormValid || submitting}
+                    className={`w-full mt-4 py-3.5 px-6 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-md ${
+                      !isFormValid || submitting
+                        ? 'bg-stone-300 dark:bg-stone-800 text-stone-500 dark:text-stone-400 cursor-not-allowed shadow-none'
+                        : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 shadow-blue-500/25 text-white cursor-pointer active:scale-98'
+                    }`}
                   >
                     {submitting ? (
                       <>
@@ -574,11 +582,18 @@ export default function CartPage() {
                       </>
                     ) : (
                       <>
-                        <span>Place Order • ₹{grandTotal}</span>
+                        <span>pay ₹{grandTotal}</span>
                         <ArrowRight className="h-4 w-4" />
                       </>
                     )}
                   </button>
+
+                  {!isFormValid && (
+                    <p className="text-[11px] text-center text-amber-600 dark:text-amber-400 font-medium flex items-center justify-center gap-1.5 pt-1">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                      <span>Please enter your full name, 10-digit phone, and delivery address to pay.</span>
+                    </p>
+                  )}
 
                   <p className="text-[10px] text-center text-stone-400 flex items-center justify-center gap-1">
                     <ShieldCheck className="h-3 w-3 text-emerald-600" />

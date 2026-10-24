@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/AdminSidebar';
 import { 
   Lock, Mail, ArrowRight, RefreshCw, CheckCircle, Clock, 
-  Database, Cloud, AlertCircle, Utensils, Star, Plus, 
-  ExternalLink, Sparkles 
+  Utensils, Star, Plus, ExternalLink, Sparkles, 
+  ShoppingBag, IndianRupee, ChefHat, CheckCircle2, AlertCircle 
 } from 'lucide-react';
 import { MenuItem, DEFAULT_MENU_ITEMS } from '@/lib/data';
 import { SunMoonThemeToggle } from '@/components/ui/sun-moon-theme-toggle';
@@ -27,6 +27,10 @@ export default function AdminPage() {
   const [dishes, setDishes] = useState<MenuItem[]>(DEFAULT_MENU_ITEMS);
   const [loadingDishes, setLoadingDishes] = useState(false);
 
+  // Live Orders fetched from Supabase
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
   // Check login state on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -37,10 +41,11 @@ export default function AdminPage() {
     }
   }, []);
 
-  // Fetch live dishes from Supabase via /api/menu when authenticated
+  // Fetch live dishes and orders when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       loadDishes();
+      loadOrders();
     }
   }, [isAuthenticated]);
 
@@ -59,6 +64,28 @@ export default function AdminPage() {
     } finally {
       setLoadingDishes(false);
     }
+  };
+
+  const loadOrders = async () => {
+    setLoadingOrders(true);
+    try {
+      const res = await fetch('/api/orders');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setOrders(data);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load orders:', e);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const refreshAllData = () => {
+    loadDishes();
+    loadOrders();
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -290,16 +317,16 @@ export default function AdminPage() {
               </Link>
 
               <button
-                onClick={loadDishes}
+                onClick={refreshAllData}
                 className="p-2.5 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white transition-colors cursor-pointer"
-                title="Refresh Dishes from Supabase"
+                title="Refresh Live Data from Supabase"
               >
-                <RefreshCw className={`h-4 w-4 ${loadingDishes ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${loadingDishes || loadingOrders ? 'animate-spin' : ''}`} />
               </button>
             </div>
           </div>
 
-          {/* Realtime Metrics: Total Dishes, Supabase, Cloudinary & Razorpay */}
+          {/* Realtime Metrics: Total Dishes & Live Orders Analytics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Dishes Metric */}
             <div className="p-5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm space-y-1">
@@ -315,45 +342,184 @@ export default function AdminPage() {
               </p>
             </div>
 
-            {/* Razorpay Gateway Status */}
+            {/* Total Live Orders Metric */}
             <div className="p-5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm space-y-1">
               <div className="flex items-center justify-between text-stone-500 dark:text-stone-400">
-                <span className="text-xs font-bold uppercase tracking-wider">Razorpay Gateway</span>
-                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                <span className="text-xs font-bold uppercase tracking-wider">Total Live Orders</span>
+                <ShoppingBag className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
-              <p className="text-sm font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1.5 pt-2">
-                Active &amp; Ready
+              <p className="text-3xl font-black text-stone-950 dark:text-white">
+                {orders.length}
               </p>
-              <Link href="/admin-razorpay" className="text-[11px] text-[#B8860B] dark:text-amber-400 hover:underline font-semibold block">
-                Manage Test &amp; Live &rarr;
-              </Link>
+              <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">
+                Fetched realtime from Supabase
+              </p>
             </div>
 
-            {/* Database Sync Status */}
+            {/* Total Order Revenue Metric */}
             <div className="p-5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm space-y-1">
               <div className="flex items-center justify-between text-stone-500 dark:text-stone-400">
-                <span className="text-xs font-bold uppercase tracking-wider">Database Status</span>
-                <Database className="h-4 w-4 text-emerald-600" />
+                <span className="text-xs font-bold uppercase tracking-wider">Total Order Revenue</span>
+                <IndianRupee className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 pt-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                Supabase Connected
+              <p className="text-3xl font-black text-stone-950 dark:text-white">
+                ₹{orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0).toLocaleString('en-IN')}
               </p>
-              <p className="text-[11px] text-stone-400 font-mono">joakjlzlnifdzlolcpwz</p>
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                Collected via Razorpay
+              </p>
             </div>
 
-            {/* Cloudinary CDN Media */}
+            {/* Active Kitchen Orders Metric */}
             <div className="p-5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm space-y-1">
               <div className="flex items-center justify-between text-stone-500 dark:text-stone-400">
-                <span className="text-xs font-bold uppercase tracking-wider">Media Hosting</span>
-                <Cloud className="h-4 w-4 text-amber-500" />
+                <span className="text-xs font-bold uppercase tracking-wider">Active Kitchen Orders</span>
+                <ChefHat className="h-4 w-4 text-amber-500" />
               </div>
-              <p className="text-sm font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 pt-2">
-                <Cloud className="h-4 w-4" />
-                Cloudinary CDN Active
+              <p className="text-3xl font-black text-stone-950 dark:text-white">
+                {orders.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled').length}
               </p>
-              <p className="text-[11px] text-stone-400 font-mono">Cloud: uvxk7ige (Ready)</p>
+              <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                Preparing or in transit
+              </p>
             </div>
+          </div>
+
+          {/* Live Order Analytics Card */}
+          <div className="rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm overflow-hidden">
+            <div className="p-5 border-b border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="h-2 w-2 rounded-full bg-blue-500 animate-ping" />
+                  <span className="h-2 w-2 rounded-full bg-blue-600 -ml-3" />
+                  <h3 className="text-base font-bold text-stone-950 dark:text-white">
+                    Live Orders Analytics
+                  </h3>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300">
+                    Realtime Supabase Sync
+                  </span>
+                </div>
+                <p className="text-xs text-stone-500 dark:text-stone-400">
+                  Live summary of incoming customer orders, kitchen processing, and payments.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/admin-order"
+                  className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                >
+                  <span>Open Full Order Manager</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Quick Status Pill Counters */}
+            <div className="p-4 bg-stone-50/70 dark:bg-stone-950/40 border-b border-stone-200 dark:border-stone-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-between">
+                <span className="text-stone-600 dark:text-stone-400 font-medium">New Placed:</span>
+                <span className="font-extrabold text-blue-600 dark:text-blue-400">
+                  {orders.filter(o => o.status === 'Placed').length}
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-between">
+                <span className="text-stone-600 dark:text-stone-400 font-medium">In Kitchen:</span>
+                <span className="font-extrabold text-amber-600 dark:text-amber-400">
+                  {orders.filter(o => o.status === 'Chef Preparing' || o.status === 'Quality Check').length}
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-between">
+                <span className="text-stone-600 dark:text-stone-400 font-medium">Out for Delivery:</span>
+                <span className="font-extrabold text-purple-600 dark:text-purple-400">
+                  {orders.filter(o => o.status === 'Out for Delivery').length}
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-between">
+                <span className="text-stone-600 dark:text-stone-400 font-medium">Completed:</span>
+                <span className="font-extrabold text-emerald-600 dark:text-emerald-400">
+                  {orders.filter(o => o.status === 'Delivered').length}
+                </span>
+              </div>
+            </div>
+
+            {/* Recent Live Orders List */}
+            {loadingOrders ? (
+              <div className="p-10 text-center text-xs text-stone-400 flex flex-col items-center gap-2">
+                <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />
+                <span>Loading live customer orders from Supabase...</span>
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="p-10 text-center text-xs text-stone-500 dark:text-stone-400 space-y-2">
+                <ShoppingBag className="h-8 w-8 mx-auto text-stone-400/60" />
+                <p className="font-semibold text-stone-700 dark:text-stone-300">No customer orders placed yet</p>
+                <p className="text-[11px]">When customers place orders from the website, they will appear here in real-time with full details.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-stone-700 dark:text-stone-300">
+                  <thead className="bg-stone-50 dark:bg-stone-950/60 text-stone-500 dark:text-stone-400 uppercase tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
+                    <tr>
+                      <th className="p-3.5">Order ID</th>
+                      <th className="p-3.5">Customer &amp; Phone</th>
+                      <th className="p-3.5">Items</th>
+                      <th className="p-3.5">Total Amount</th>
+                      <th className="p-3.5">Payment</th>
+                      <th className="p-3.5">Status</th>
+                      <th className="p-3.5 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
+                    {orders.slice(0, 5).map((order) => (
+                      <tr key={order.id} className="hover:bg-stone-50/70 dark:hover:bg-stone-800/40 transition-colors">
+                        <td className="p-3.5 font-mono font-bold text-stone-900 dark:text-white">
+                          #{order.id}
+                        </td>
+                        <td className="p-3.5">
+                          <p className="font-bold text-stone-900 dark:text-white">{order.customerName}</p>
+                          <p className="text-[11px] text-stone-500 font-mono">{order.phone}</p>
+                        </td>
+                        <td className="p-3.5">
+                          <p className="font-semibold text-stone-800 dark:text-stone-200">
+                            {order.items?.length || 0} dishes
+                          </p>
+                          <p className="text-[11px] text-stone-500 truncate max-w-xs">
+                            {order.items?.map((i: any) => `${i.name} (x${i.quantity})`).join(', ')}
+                          </p>
+                        </td>
+                        <td className="p-3.5 font-bold text-sm text-stone-950 dark:text-white">
+                          ₹{order.total}
+                        </td>
+                        <td className="p-3.5">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300">
+                            {order.paymentStatus || 'Paid'} ({order.paymentMethod || 'Razorpay'})
+                          </span>
+                        </td>
+                        <td className="p-3.5">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            order.status === 'Placed'
+                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300'
+                              : order.status === 'Delivered'
+                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                              : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                          }`}>
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-right">
+                          <Link
+                            href="/admin-order"
+                            className="py-1 px-2.5 rounded-lg border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 font-semibold text-[11px] transition-colors inline-block"
+                          >
+                            Manage Order
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           {/* Main Box: Live Dishes on the Website */}

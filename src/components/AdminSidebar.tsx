@@ -92,9 +92,9 @@ export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
             <p className="text-xs font-bold text-stone-900 dark:text-white truncate">
               umeshbiz16@gmail.com
             </p>
-            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-mono">
+            <p className="text-[10px] text-stone-500 dark:text-stone-400 flex items-center gap-1 font-mono">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Supabase Verified Admin
+              Administrator
             </p>
           </div>
         </div>

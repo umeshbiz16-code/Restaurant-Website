@@ -1,18 +1,20 @@
 -- ==============================================================================
--- SATVIK CATERS AND EVENTS - PRODUCTION SUPABASE DATABASE SCHEMA
+-- SATVIK CATERS AND EVENTS - FIXED IDEMPOTENT SUPABASE DATABASE SCHEMA
 -- ==============================================================================
--- Includes:
--- 1. Admin Users & Credentials Verification (umeshbiz16@gmail.com / Umesh#2032)
--- 2. Menu Items & Dishes Manager (/admin-menu, /menu, /strater)
--- 3. Customer Food Delivery Orders & Razorpay Payments (/cart, /admin-order)
--- 4. Razorpay Payment Gateway Live & Test Configuration (/admin-razorpay)
+-- 1. Enable UUID Extension
+-- 2. Admin Authentication Table (admin_users)
+-- 3. Categories Table (categories)
+-- 4. Menu Items Table (menu_items)
+-- 5. Razorpay Gateway Settings Table (razorpay_settings)
+-- 6. Customer Orders Table (orders) with safe column migrations
+-- 7. Row Level Security (RLS) Policies (with DROP POLICY IF EXISTS)
 -- ==============================================================================
 
--- Enable UUID extension
+-- 1. Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ------------------------------------------------------------------------------
--- 1. ADMIN USERS TABLE (Admin Authentication for /admin, /admin-menu, /admin-order, /admin-razorpay)
+-- 2. ADMIN USERS TABLE (Authentication for /admin, /admin-menu, /admin-order, /admin-razorpay)
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.admin_users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -23,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.admin_users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Seed requested verified Admin Credentials
+-- Seed verified Admin Credentials
 INSERT INTO public.admin_users (email, password_hash, role)
 VALUES ('umeshbiz16@gmail.com', 'Umesh#2032', 'admin')
 ON CONFLICT (email) DO UPDATE 
@@ -31,7 +33,7 @@ SET password_hash = EXCLUDED.password_hash,
     updated_at = timezone('utc'::text, now());
 
 -- ------------------------------------------------------------------------------
--- 2. CATEGORIES TABLE
+-- 3. CATEGORIES TABLE
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.categories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -51,7 +53,7 @@ VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- ------------------------------------------------------------------------------
--- 3. MENU ITEMS & DISHES TABLE (/admin-menu, /menu, /strater)
+-- 4. MENU ITEMS & DISHES TABLE (/admin-menu, /menu, /strater)
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.menu_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -90,7 +92,7 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- ------------------------------------------------------------------------------
--- 4. RAZORPAY GATEWAY CONFIGURATION TABLE (/admin-razorpay)
+-- 5. RAZORPAY GATEWAY CONFIGURATION TABLE (/admin-razorpay)
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.razorpay_settings (
     id TEXT PRIMARY KEY DEFAULT 'default',
@@ -109,8 +111,9 @@ VALUES ('default', 'test', '8527296771')
 ON CONFLICT (id) DO NOTHING;
 
 -- ------------------------------------------------------------------------------
--- 5. CUSTOMER ORDERS TABLE (/cart checkout & /admin-order)
+-- 6. CUSTOMER ORDERS TABLE (/cart checkout & /admin-order)
 -- ------------------------------------------------------------------------------
+-- Step 6a: Create base table if it doesn't exist
 CREATE TABLE IF NOT EXISTS public.orders (
     id TEXT PRIMARY KEY, -- e.g. 'SATVIK-109283'
     customer_name TEXT NOT NULL,
@@ -122,10 +125,10 @@ CREATE TABLE IF NOT EXISTS public.orders (
     delivery_charge DECIMAL(10, 2) DEFAULT 0,
     tax DECIMAL(10, 2) DEFAULT 0,
     total DECIMAL(10, 2) NOT NULL,
-    status TEXT DEFAULT 'Placed' CHECK (status IN ('Placed', 'Chef Preparing', 'Quality Check', 'Out for Delivery', 'Delivered', 'Cancelled')),
+    status TEXT DEFAULT 'Placed',
     payment_method TEXT DEFAULT 'Razorpay',
-    payment_status TEXT DEFAULT 'Paid' CHECK (payment_status IN ('Pending', 'Paid', 'Failed')),
-    gateway_mode TEXT DEFAULT 'test' CHECK (gateway_mode IN ('test', 'live')),
+    payment_status TEXT DEFAULT 'Paid',
+    gateway_mode TEXT DEFAULT 'test',
     razorpay_order_id TEXT,
     razorpay_payment_id TEXT,
     razorpay_signature TEXT,
@@ -134,12 +137,24 @@ CREATE TABLE IF NOT EXISTS public.orders (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Step 6b: Safely add any missing columns if public.orders already existed previously (Fixes: column "razorpay_payment_id" does not exist)
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'Razorpay';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'Paid';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS gateway_mode TEXT DEFAULT 'test';
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS razorpay_order_id TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS razorpay_payment_id TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS razorpay_signature TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS special_instructions TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS whatsapp_notified BOOLEAN DEFAULT false;
+
+-- Step 6c: Safe Indexes
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON public.orders (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders (status);
 CREATE INDEX IF NOT EXISTS idx_orders_payment_id ON public.orders (razorpay_payment_id);
 
 -- ------------------------------------------------------------------------------
--- 6. ROW LEVEL SECURITY (RLS) POLICIES
+-- 7. ROW LEVEL SECURITY (RLS) POLICIES (Idempotent with DROP POLICY IF EXISTS)
 -- ------------------------------------------------------------------------------
 ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
@@ -147,15 +162,37 @@ ALTER TABLE public.menu_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.razorpay_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
--- Public read for active menu items and categories
+-- Categories Policies
+DROP POLICY IF EXISTS "Public read categories" ON public.categories;
 CREATE POLICY "Public read categories" ON public.categories FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Admin all categories" ON public.categories;
+CREATE POLICY "Admin all categories" ON public.categories FOR ALL USING (true);
+
+-- Menu Items Policies
+DROP POLICY IF EXISTS "Public read menu_items" ON public.menu_items;
 CREATE POLICY "Public read menu_items" ON public.menu_items FOR SELECT USING (available = true);
+
+DROP POLICY IF EXISTS "Admin all menu_items" ON public.menu_items;
+CREATE POLICY "Admin all menu_items" ON public.menu_items FOR ALL USING (true);
+
+-- Admin Users Policies
+DROP POLICY IF EXISTS "Admin all admin_users" ON public.admin_users;
+CREATE POLICY "Admin all admin_users" ON public.admin_users FOR ALL USING (true);
+
+-- Razorpay Settings Policies
+DROP POLICY IF EXISTS "Public read razorpay_settings" ON public.razorpay_settings;
+CREATE POLICY "Public read razorpay_settings" ON public.razorpay_settings FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Admin all razorpay_settings" ON public.razorpay_settings;
+CREATE POLICY "Admin all razorpay_settings" ON public.razorpay_settings FOR ALL USING (true);
+
+-- Orders Policies
+DROP POLICY IF EXISTS "Public create orders" ON public.orders;
 CREATE POLICY "Public create orders" ON public.orders FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public read orders" ON public.orders;
 CREATE POLICY "Public read orders" ON public.orders FOR SELECT USING (true);
 
--- Admin & Service Role full access
-CREATE POLICY "Admin all admin_users" ON public.admin_users FOR ALL USING (true);
-CREATE POLICY "Admin all menu_items" ON public.menu_items FOR ALL USING (true);
-CREATE POLICY "Admin all categories" ON public.categories FOR ALL USING (true);
-CREATE POLICY "Admin all razorpay_settings" ON public.razorpay_settings FOR ALL USING (true);
+DROP POLICY IF EXISTS "Admin all orders" ON public.orders;
 CREATE POLICY "Admin all orders" ON public.orders FOR ALL USING (true);
