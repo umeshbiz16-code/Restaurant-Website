@@ -268,6 +268,20 @@ export default function AdminPage() {
               </div>
 
               <Link
+                href="/admin-order"
+                className="py-2.5 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 shadow-sm"
+              >
+                <span>Live Orders</span>
+              </Link>
+
+              <Link
+                href="/admin-razorpay"
+                className="py-2.5 px-3.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 shadow-sm border border-stone-200 dark:border-stone-700"
+              >
+                <span>Razorpay Settings</span>
+              </Link>
+
+              <Link
                 href="/admin-menu"
                 className="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 shadow-sm"
               >
@@ -285,20 +299,34 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* Realtime Metrics: Total Dishes from Supabase */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {/* Realtime Metrics: Total Dishes, Supabase, Cloudinary & Razorpay */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Dishes Metric */}
             <div className="p-5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm space-y-1">
               <div className="flex items-center justify-between text-stone-500 dark:text-stone-400">
-                <span className="text-xs font-bold uppercase tracking-wider">Total Dishes on Website</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Total Dishes</span>
                 <Utensils className="h-4 w-4 text-[#B8860B]" />
               </div>
               <p className="text-3xl font-black text-stone-950 dark:text-white">
                 {dishes.length}
               </p>
               <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-                Fetched live from Supabase
+                Live on public website
               </p>
+            </div>
+
+            {/* Razorpay Gateway Status */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm space-y-1">
+              <div className="flex items-center justify-between text-stone-500 dark:text-stone-400">
+                <span className="text-xs font-bold uppercase tracking-wider">Razorpay Gateway</span>
+                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+              </div>
+              <p className="text-sm font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1.5 pt-2">
+                Active &amp; Ready
+              </p>
+              <Link href="/admin-razorpay" className="text-[11px] text-[#B8860B] dark:text-amber-400 hover:underline font-semibold block">
+                Manage Test &amp; Live &rarr;
+              </Link>
             </div>
 
             {/* Database Sync Status */}
@@ -311,13 +339,13 @@ export default function AdminPage() {
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 Supabase Connected
               </p>
-              <p className="text-[11px] text-stone-400 font-mono">joakjlzlnifdzlolcpwz.supabase.co</p>
+              <p className="text-[11px] text-stone-400 font-mono">joakjlzlnifdzlolcpwz</p>
             </div>
 
             {/* Cloudinary CDN Media */}
             <div className="p-5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm space-y-1">
               <div className="flex items-center justify-between text-stone-500 dark:text-stone-400">
-                <span className="text-xs font-bold uppercase tracking-wider">Media Hosting CDN</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Media Hosting</span>
                 <Cloud className="h-4 w-4 text-amber-500" />
               </div>
               <p className="text-sm font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 pt-2">

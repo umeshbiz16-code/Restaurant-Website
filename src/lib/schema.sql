@@ -4,15 +4,15 @@
 -- Includes:
 -- 1. Admin Users & Credentials Verification (umeshbiz16@gmail.com / Umesh#2032)
 -- 2. Menu Items & Dishes Manager (/admin-menu, /menu, /strater)
--- 3. Customer Food Delivery Cart Orders (/cart)
--- 4. Catering Packages & IRCTC Train Delivery Orders (/service)
+-- 3. Customer Food Delivery Orders & Razorpay Payments (/cart, /admin-order)
+-- 4. Razorpay Payment Gateway Live & Test Configuration (/admin-razorpay)
 -- ==============================================================================
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ------------------------------------------------------------------------------
--- 1. ADMIN USERS TABLE (Admin Authentication for /admin & /admin-menu)
+-- 1. ADMIN USERS TABLE (Admin Authentication for /admin, /admin-menu, /admin-order, /admin-razorpay)
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.admin_users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -90,10 +90,29 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- ------------------------------------------------------------------------------
--- 4. CUSTOMER ORDERS TABLE (/cart checkout)
+-- 4. RAZORPAY GATEWAY CONFIGURATION TABLE (/admin-razorpay)
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.razorpay_settings (
+    id TEXT PRIMARY KEY DEFAULT 'default',
+    mode TEXT NOT NULL DEFAULT 'test' CHECK (mode IN ('test', 'live')),
+    test_key_id TEXT,
+    test_key_secret TEXT,
+    live_key_id TEXT,
+    live_key_secret TEXT,
+    notification_whatsapp TEXT DEFAULT '8527296771' NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Seed Initial Razorpay Gateway Settings
+INSERT INTO public.razorpay_settings (id, mode, notification_whatsapp)
+VALUES ('default', 'test', '8527296771')
+ON CONFLICT (id) DO NOTHING;
+
+-- ------------------------------------------------------------------------------
+-- 5. CUSTOMER ORDERS TABLE (/cart checkout & /admin-order)
 -- ------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.orders (
-    id TEXT PRIMARY KEY, -- e.g. 'SAT-1092'
+    id TEXT PRIMARY KEY, -- e.g. 'SATVIK-109283'
     customer_name TEXT NOT NULL,
     phone TEXT NOT NULL,
     email TEXT,
@@ -104,21 +123,28 @@ CREATE TABLE IF NOT EXISTS public.orders (
     tax DECIMAL(10, 2) DEFAULT 0,
     total DECIMAL(10, 2) NOT NULL,
     status TEXT DEFAULT 'Placed' CHECK (status IN ('Placed', 'Chef Preparing', 'Quality Check', 'Out for Delivery', 'Delivered', 'Cancelled')),
-    payment_method TEXT DEFAULT 'Cash on Delivery',
-    payment_status TEXT DEFAULT 'Pending' CHECK (payment_status IN ('Pending', 'Paid', 'Failed')),
+    payment_method TEXT DEFAULT 'Razorpay',
+    payment_status TEXT DEFAULT 'Paid' CHECK (payment_status IN ('Pending', 'Paid', 'Failed')),
+    gateway_mode TEXT DEFAULT 'test' CHECK (gateway_mode IN ('test', 'live')),
+    razorpay_order_id TEXT,
+    razorpay_payment_id TEXT,
+    razorpay_signature TEXT,
     special_instructions TEXT,
+    whatsapp_notified BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON public.orders (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders (status);
+CREATE INDEX IF NOT EXISTS idx_orders_payment_id ON public.orders (razorpay_payment_id);
 
 -- ------------------------------------------------------------------------------
--- 5. ROW LEVEL SECURITY (RLS) POLICIES
+-- 6. ROW LEVEL SECURITY (RLS) POLICIES
 -- ------------------------------------------------------------------------------
 ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.menu_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.razorpay_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
 -- Public read for active menu items and categories
@@ -131,4 +157,5 @@ CREATE POLICY "Public read orders" ON public.orders FOR SELECT USING (true);
 CREATE POLICY "Admin all admin_users" ON public.admin_users FOR ALL USING (true);
 CREATE POLICY "Admin all menu_items" ON public.menu_items FOR ALL USING (true);
 CREATE POLICY "Admin all categories" ON public.categories FOR ALL USING (true);
+CREATE POLICY "Admin all razorpay_settings" ON public.razorpay_settings FOR ALL USING (true);
 CREATE POLICY "Admin all orders" ON public.orders FOR ALL USING (true);
