@@ -33,13 +33,13 @@ export interface OrderItem {
   name: string;
   price: number;
   quantity: number;
-  category: string;
+  category?: string;
 }
 
 export interface Order {
   id: string;
   customerName: string;
-  email: string;
+  email?: string;
   phone: string;
   address: string;
   items: OrderItem[];
@@ -47,9 +47,14 @@ export interface Order {
   deliveryCharge: number;
   tax: number;
   total: number;
-  status: "Placed" | "Chef Preparing" | "Quality Check" | "Out for Delivery" | "Delivered";
-  paymentMethod: "Card" | "UPI" | "NetBanking";
-  paymentStatus: "Pending" | "Paid" | "Failed";
+  status: "Placed" | "Chef Preparing" | "Quality Check" | "Out for Delivery" | "Delivered" | "Cancelled" | string;
+  paymentMethod: "Razorpay" | "Card" | "UPI" | "NetBanking" | "Cash on Delivery" | string;
+  paymentStatus: "Pending" | "Paid" | "Failed" | string;
+  gatewayMode?: "test" | "live";
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
+  whatsappNotified?: boolean;
   transactionId?: string;
   createdAt: number;
   estimatedDeliveryAt: number;
