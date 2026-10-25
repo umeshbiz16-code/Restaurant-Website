@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getRazorpaySettings, updateRazorpaySettings, getActiveRazorpayCredentials } from '@/lib/razorpay';
+import { getRazorpaySettings, updateRazorpaySettings, getActiveRazorpayCredentials, isRealKey } from '@/lib/razorpay';
 
 export async function GET() {
   try {
@@ -12,9 +12,9 @@ export async function GET() {
       activeKeyId: active.keyId,
       isRealKeysConfigured: active.isRealKeysConfigured,
       testKeyId: settings.testKeyId,
-      testKeyConfigured: Boolean(settings.testKeyId && !settings.testKeyId.includes('YOUR_')),
+      testKeyConfigured: isRealKey(settings.testKeyId),
       liveKeyId: settings.liveKeyId,
-      liveKeyConfigured: Boolean(settings.liveKeyId && !settings.liveKeyId.includes('YOUR_')),
+      liveKeyConfigured: isRealKey(settings.liveKeyId),
       notificationWhatsapp: settings.notificationWhatsapp || '8527296771',
     });
   } catch (err: any) {

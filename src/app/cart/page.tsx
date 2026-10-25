@@ -34,6 +34,7 @@ export default function CartPage() {
   const [submitting, setSubmitting] = useState(false);
   const [placedOrder, setPlacedOrder] = useState<any | null>(null);
   const [whatsappLink, setWhatsappLink] = useState<string>('');
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   // Validate form completeness before enabling payment
   const cleanPhone = phone.replace(/\D/g, '');
@@ -45,11 +46,12 @@ export default function CartPage() {
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName.trim() || !phone.trim() || !address.trim()) {
-      alert('Please fill in your name, contact phone number, and delivery address before proceeding to payment.');
+      setPaymentError('Please fill in your name, contact phone number, and delivery address before proceeding to payment.');
       return;
     }
 
     setSubmitting(true);
+    setPaymentError(null);
 
     try {
       // 1. Create order on backend via Razorpay REST API
@@ -81,8 +83,8 @@ export default function CartPage() {
           currency: currency || 'INR',
           name: 'Satvik Caters & Events',
           description: `Satvik Pure Food Order • ₹${grandTotal}`,
-          image: '/images/logo-light.png',
-          order_id: orderId.startsWith('order_') ? orderId : undefined,
+          image: typeof window !== 'undefined' ? `${window.location.origin}/images/logo-light.png` : undefined,
+          order_id: orderId && orderId.startsWith('order_') ? orderId : undefined,
           prefill: {
             name: customerName,
             contact: phone,
@@ -135,7 +137,7 @@ export default function CartPage() {
                 throw new Error(verifyData.error || 'Payment verification failed');
               }
             } catch (vErr: any) {
-              alert(`Payment verification error: ${vErr.message}`);
+              setPaymentError(`Payment verification error: ${vErr.message}`);
             } finally {
               setSubmitting(false);
             }
@@ -144,7 +146,8 @@ export default function CartPage() {
 
         const razorpayInstance = new (window as any).Razorpay(options);
         razorpayInstance.on('payment.failed', function (failResp: any) {
-          alert(`Payment Failed: ${failResp.error.description || 'Payment could not be processed'}`);
+          const reason = failResp?.error?.description || failResp?.error?.reason || 'Payment could not be completed';
+          setPaymentError(reason);
           setSubmitting(false);
         });
         razorpayInstance.open();
@@ -187,7 +190,7 @@ export default function CartPage() {
         setSubmitting(false);
       }
     } catch (err: any) {
-      alert(`Could not initiate payment: ${err.message}`);
+      setPaymentError(err.message || 'Could not initiate payment');
       setSubmitting(false);
     }
   };
@@ -564,6 +567,29 @@ export default function CartPage() {
                       </span>
                     </div>
                   </div>
+
+                  {/* Payment Error Banner */}
+                  {paymentError && (
+                    <div className="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-xs text-red-800 dark:text-red-200 flex items-start justify-between gap-2.5 animate-fade-in">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-bold text-red-900 dark:text-red-100">Payment Notice</p>
+                          <p className="text-[11px] text-red-700 dark:text-red-300 mt-0.5 leading-relaxed">
+                            {paymentError}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentError(null)}
+                        className="text-red-400 hover:text-red-600 dark:hover:text-red-200 font-bold text-xs p-1 cursor-pointer"
+                        title="Dismiss"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
 
                   {/* Pay Button - BLUE AMAZON STYLE (Requires full form completion) */}
                   <button

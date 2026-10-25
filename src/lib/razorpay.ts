@@ -13,20 +13,48 @@ export interface RazorpaySettings {
   updatedAt?: string;
 }
 
+// Helper to check if a key is a real configured key (not a placeholder)
+export function isRealKey(k?: string | null): boolean {
+  if (!k || typeof k !== 'string') return false;
+  const trimmed = k.trim();
+  return (
+    trimmed.length > 5 &&
+    !trimmed.includes('YOUR_') &&
+    !trimmed.includes('placeholder')
+  );
+}
+
 // Runtime cached settings (allows instant mode switching in memory + Supabase sync)
 let cachedSettings: RazorpaySettings = {
   mode: (process.env.RAZORPAY_MODE === 'live' ? 'live' : 'test') as RazorpayMode,
-  testKeyId: process.env.RAZORPAY_KEY_ID_TEST || 'rzp_test_YOUR_TEST_KEY_ID',
-  testKeySecret: process.env.RAZORPAY_KEY_SECRET_TEST || 'YOUR_TEST_KEY_SECRET',
-  liveKeyId: process.env.RAZORPAY_KEY_ID_LIVE || 'rzp_live_YOUR_LIVE_KEY_ID',
-  liveKeySecret: process.env.RAZORPAY_KEY_SECRET_LIVE || 'YOUR_LIVE_KEY_SECRET',
+  testKeyId: process.env.RAZORPAY_KEY_ID_TEST || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
+  testKeySecret: process.env.RAZORPAY_KEY_SECRET_TEST || '',
+  liveKeyId: process.env.RAZORPAY_KEY_ID_LIVE || '',
+  liveKeySecret: process.env.RAZORPAY_KEY_SECRET_LIVE || '',
   notificationWhatsapp: process.env.ORDER_NOTIFY_WHATSAPP || '8527296771',
 };
 
 /**
- * Loads Razorpay settings from Supabase or runtime cache
+ * Loads Razorpay settings from Supabase and/or environment variables.
+ * Automatically chooses real configured keys over placeholders.
  */
 export async function getRazorpaySettings(): Promise<RazorpaySettings> {
+  const envMode = (process.env.RAZORPAY_MODE === 'live' ? 'live' : 'test') as RazorpayMode;
+  const envTestKeyId = process.env.RAZORPAY_KEY_ID_TEST || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '';
+  const envTestKeySecret = process.env.RAZORPAY_KEY_SECRET_TEST || '';
+  const envLiveKeyId = process.env.RAZORPAY_KEY_ID_LIVE || '';
+  const envLiveKeySecret = process.env.RAZORPAY_KEY_SECRET_LIVE || '';
+  const envWhatsapp = process.env.ORDER_NOTIFY_WHATSAPP || '8527296771';
+
+  let currentSettings: RazorpaySettings = {
+    mode: envMode,
+    testKeyId: envTestKeyId,
+    testKeySecret: envTestKeySecret,
+    liveKeyId: envLiveKeyId,
+    liveKeySecret: envLiveKeySecret,
+    notificationWhatsapp: envWhatsapp,
+  };
+
   const client = supabaseAdmin || supabase;
   if (client) {
     try {
@@ -37,53 +65,98 @@ export async function getRazorpaySettings(): Promise<RazorpaySettings> {
         .single();
 
       if (!error && data) {
-        cachedSettings = {
-          mode: (data.mode === 'live' ? 'live' : 'test') as RazorpayMode,
-          testKeyId: data.test_key_id || cachedSettings.testKeyId,
-          testKeySecret: data.test_key_secret || cachedSettings.testKeySecret,
-          liveKeyId: data.live_key_id || cachedSettings.liveKeyId,
-          liveKeySecret: data.live_key_secret || cachedSettings.liveKeySecret,
-          notificationWhatsapp: data.notification_whatsapp || cachedSettings.notificationWhatsapp,
+        const dbMode = data.mode === 'live' ? 'live' : 'test';
+
+        // Select real keys: prefer valid key from DB; if DB has placeholder/missing, fallback to env
+        const testKeyId = isRealKey(data.test_key_id)
+          ? data.test_key_id.trim()
+          : (isRealKey(envTestKeyId) ? envTestKeyId.trim() : (data.test_key_id || ''));
+
+        const testKeySecret = isRealKey(data.test_key_secret)
+          ? data.test_key_secret.trim()
+          : (isRealKey(envTestKeySecret) ? envTestKeySecret.trim() : (data.test_key_secret || ''));
+
+        const liveKeyId = isRealKey(data.live_key_id)
+          ? data.live_key_id.trim()
+          : (isRealKey(envLiveKeyId) ? envLiveKeyId.trim() : (data.live_key_id || ''));
+
+        const liveKeySecret = isRealKey(data.live_key_secret)
+          ? data.live_key_secret.trim()
+          : (isRealKey(envLiveKeySecret) ? envLiveKeySecret.trim() : (data.live_key_secret || ''));
+
+        const notificationWhatsapp = data.notification_whatsapp || envWhatsapp;
+
+        currentSettings = {
+          mode: dbMode,
+          testKeyId,
+          testKeySecret,
+          liveKeyId,
+          liveKeySecret,
+          notificationWhatsapp,
           updatedAt: data.updated_at
         };
+
+        // Auto-heal DB: If DB lacked real keys but env has them, update DB automatically
+        if ((!isRealKey(data.live_key_id) && isRealKey(envLiveKeyId)) ||
+            (!isRealKey(data.test_key_id) && isRealKey(envTestKeyId))) {
+          client
+            .from('razorpay_settings')
+            .update({
+              test_key_id: testKeyId,
+              test_key_secret: testKeySecret,
+              live_key_id: liveKeyId,
+              live_key_secret: liveKeySecret,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', 'default')
+            .then(() => {}, () => {});
+        }
       }
     } catch {
-      // Fallback to cached
+      // Fallback to env currentSettings
     }
   }
-  return cachedSettings;
+
+  cachedSettings = currentSettings;
+  return currentSettings;
 }
 
 /**
  * Saves/updates Razorpay settings into Supabase & runtime cache
  */
 export async function updateRazorpaySettings(newSettings: Partial<RazorpaySettings>): Promise<RazorpaySettings> {
-  cachedSettings = {
-    ...cachedSettings,
+  const current = await getRazorpaySettings();
+  const updated: RazorpaySettings = {
+    ...current,
     ...newSettings,
   };
 
   const client = supabaseAdmin || supabase;
   if (client) {
     try {
+      const payload: any = {
+        updated_at: new Date().toISOString()
+      };
+      if (newSettings.mode) payload.mode = newSettings.mode;
+      if (isRealKey(newSettings.testKeyId)) payload.test_key_id = newSettings.testKeyId;
+      if (isRealKey(newSettings.testKeySecret)) payload.test_key_secret = newSettings.testKeySecret;
+      if (isRealKey(newSettings.liveKeyId)) payload.live_key_id = newSettings.liveKeyId;
+      if (isRealKey(newSettings.liveKeySecret)) payload.live_key_secret = newSettings.liveKeySecret;
+      if (newSettings.notificationWhatsapp) payload.notification_whatsapp = newSettings.notificationWhatsapp;
+
       await client
         .from('razorpay_settings')
         .upsert({
           id: 'default',
-          mode: cachedSettings.mode,
-          test_key_id: cachedSettings.testKeyId,
-          test_key_secret: cachedSettings.testKeySecret,
-          live_key_id: cachedSettings.liveKeyId,
-          live_key_secret: cachedSettings.liveKeySecret,
-          notification_whatsapp: cachedSettings.notificationWhatsapp,
-          updated_at: new Date().toISOString()
+          ...payload
         }, { onConflict: 'id' });
     } catch (e) {
       console.warn('Could not sync razorpay settings to Supabase, cached in memory:', e);
     }
   }
 
-  return cachedSettings;
+  cachedSettings = updated;
+  return updated;
 }
 
 /**
@@ -168,22 +241,53 @@ export async function createRazorpayOrder(
         };
       } else {
         const errData = await response.json().catch(() => ({}));
-        console.warn('Razorpay API error, falling back to simulated order:', errData);
+        console.error('Razorpay API error response:', errData);
+        const errMsg = errData.error?.description || errData.error?.message || 'Razorpay order creation failed';
+        return {
+          success: false,
+          orderId: '',
+          amount: amountInPaise,
+          currency: 'INR',
+          keyId,
+          mode,
+          error: errMsg
+        };
       }
     } catch (err: any) {
-      console.warn('Razorpay network error:', err.message);
+      console.error('Razorpay network error:', err);
+      return {
+        success: false,
+        orderId: '',
+        amount: amountInPaise,
+        currency: 'INR',
+        keyId,
+        mode,
+        error: err.message || 'Network connection to Razorpay failed'
+      };
     }
   }
 
-  // Graceful fallback order creation for local testing / mock transactions
-  const simulatedOrderId = `order_${mode === 'live' ? 'live' : 'test'}_${Date.now()}`;
+  // Fallback ONLY in test mode when no credentials are configured
+  if (mode === 'test') {
+    const simulatedOrderId = `order_test_${Date.now()}`;
+    return {
+      success: true,
+      orderId: simulatedOrderId,
+      amount: amountInPaise,
+      currency: 'INR',
+      keyId: keyId.startsWith('rzp_') ? keyId : 'rzp_test_simulated',
+      mode
+    };
+  }
+
   return {
-    success: true,
-    orderId: simulatedOrderId,
+    success: false,
+    orderId: '',
     amount: amountInPaise,
     currency: 'INR',
-    keyId: keyId.startsWith('rzp_') ? keyId : `rzp_${mode}_demoKey12345`,
-    mode
+    keyId: '',
+    mode,
+    error: 'Live Razorpay API keys are not configured or account is not ready. Please verify RAZORPAY_KEY_ID_LIVE and RAZORPAY_KEY_SECRET_LIVE.'
   };
 }
 
