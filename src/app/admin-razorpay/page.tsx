@@ -19,7 +19,7 @@ export default function AdminRazorpayPage() {
 
   // Settings State
   const [mode, setMode] = useState<'test' | 'live'>('test');
-  const [notificationWhatsapp, setNotificationWhatsapp] = useState('8527296771');
+  const [notificationWhatsapp, setNotificationWhatsapp] = useState('9981508165');
   const [isRealKeysConfigured, setIsRealKeysConfigured] = useState(false);
   const [testingOrder, setTestingOrder] = useState(false);
   const [testOrderResult, setTestOrderResult] = useState<any | null>(null);
@@ -44,7 +44,7 @@ export default function AdminRazorpayPage() {
       if (res.ok) {
         const data = await res.json();
         setMode(data.mode || 'test');
-        setNotificationWhatsapp(data.notificationWhatsapp || '8527296771');
+        setNotificationWhatsapp(data.notificationWhatsapp || '9981508165');
         setIsRealKeysConfigured(data.isRealKeysConfigured || false);
       }
     } catch (err) {
@@ -99,7 +99,7 @@ export default function AdminRazorpayPage() {
         body: JSON.stringify({
           amount: 299,
           customerName: 'Test Admin',
-          phone: '8527296771',
+          phone: '9981508165',
           address: 'Pushpa Nagar Kitchen, Bhopal',
           notes: 'Testing payment gateway connectivity',
         }),

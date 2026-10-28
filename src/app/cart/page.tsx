@@ -209,7 +209,7 @@ export default function CartPage() {
       <main className="flex-grow py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         
         {/* ----------------------------------------------------------------------------
-           ORDER CONFIRMED SCREEN (With WhatsApp notification to 8527296771)
+           ORDER CONFIRMED SCREEN (With WhatsApp notification to 9981508165)
            ---------------------------------------------------------------------------- */}
         {placedOrder ? (
           <div className="max-w-xl mx-auto my-10 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-3xl p-6 sm:p-8 text-center shadow-2xl space-y-6 animate-fade-in">
@@ -234,10 +234,10 @@ export default function CartPage() {
             <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-left space-y-2">
               <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-300">
                 <MessageSquare className="h-4 w-4 text-emerald-600 shrink-0" />
-                <span>Order Alert Dispatched to WhatsApp (8527296771)</span>
+                <span>Order Alert Dispatched to WhatsApp (9981508165)</span>
               </div>
               <p className="text-[11px] text-emerald-700 dark:text-emerald-400 leading-relaxed">
-                A complete order notification with dish list, customer name, phone number, address, and cooking notes has been formatted and triggered to kitchen number <strong>8527296771</strong>.
+                A complete order notification with dish list, customer name, phone number, address, and cooking notes has been formatted and triggered to kitchen number <strong>9981508165</strong>.
               </p>
               {whatsappLink && (
                 <div className="pt-1">
@@ -623,7 +623,7 @@ export default function CartPage() {
 
                   <p className="text-[10px] text-center text-stone-400 flex items-center justify-center gap-1">
                     <ShieldCheck className="h-3 w-3 text-emerald-600" />
-                    <span>WhatsApp order alert automatically dispatched to 8527296771 upon payment</span>
+                    <span>WhatsApp order alert automatically dispatched to 9981508165 upon payment</span>
                   </p>
                 </div>
 

@@ -1,5 +1,5 @@
 // ==============================================================================
-// WHATSAPP ORDER NOTIFICATION DISPATCHER (Admin Alert: 8527296771)
+// WHATSAPP ORDER NOTIFICATION DISPATCHER (Admin Alert: 9981508165)
 // ==============================================================================
 
 export interface OrderItem {
@@ -28,7 +28,7 @@ export interface OrderNotificationPayload {
   createdAt?: number | string;
 }
 
-export const ADMIN_WHATSAPP_NUMBER = process.env.ORDER_NOTIFY_WHATSAPP || '8527296771';
+export const ADMIN_WHATSAPP_NUMBER = process.env.ORDER_NOTIFY_WHATSAPP || '9981508165';
 
 /**
  * Formats a clean, professional, readable WhatsApp order alert message
@@ -72,7 +72,7 @@ export function formatOrderWhatsAppMessage(order: OrderNotificationPayload): str
 }
 
 /**
- * Generates direct wa.me URL to send message to target admin WhatsApp number (8527296771)
+ * Generates direct wa.me URL to send message to target admin WhatsApp number (9981508165)
  */
 export function generateWhatsAppDirectLink(
   order: OrderNotificationPayload,

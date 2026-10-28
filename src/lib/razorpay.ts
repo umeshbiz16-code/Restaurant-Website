@@ -31,7 +31,7 @@ let cachedSettings: RazorpaySettings = {
   testKeySecret: process.env.RAZORPAY_KEY_SECRET_TEST || '',
   liveKeyId: process.env.RAZORPAY_KEY_ID_LIVE || '',
   liveKeySecret: process.env.RAZORPAY_KEY_SECRET_LIVE || '',
-  notificationWhatsapp: process.env.ORDER_NOTIFY_WHATSAPP || '8527296771',
+  notificationWhatsapp: process.env.ORDER_NOTIFY_WHATSAPP || '9981508165',
 };
 
 /**
@@ -44,7 +44,7 @@ export async function getRazorpaySettings(): Promise<RazorpaySettings> {
   const envTestKeySecret = process.env.RAZORPAY_KEY_SECRET_TEST || '';
   const envLiveKeyId = process.env.RAZORPAY_KEY_ID_LIVE || '';
   const envLiveKeySecret = process.env.RAZORPAY_KEY_SECRET_LIVE || '';
-  const envWhatsapp = process.env.ORDER_NOTIFY_WHATSAPP || '8527296771';
+  const envWhatsapp = process.env.ORDER_NOTIFY_WHATSAPP || '9981508165';
 
   let currentSettings: RazorpaySettings = {
     mode: envMode,

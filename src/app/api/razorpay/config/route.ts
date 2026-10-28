@@ -15,7 +15,7 @@ export async function GET() {
       testKeyConfigured: isRealKey(settings.testKeyId),
       liveKeyId: settings.liveKeyId,
       liveKeyConfigured: isRealKey(settings.liveKeyId),
-      notificationWhatsapp: settings.notificationWhatsapp || '8527296771',
+      notificationWhatsapp: settings.notificationWhatsapp || '9981508165',
     });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });

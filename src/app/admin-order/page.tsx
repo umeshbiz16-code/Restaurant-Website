@@ -415,10 +415,10 @@ export default function AdminOrderPage() {
                         target="_blank"
                         rel="noreferrer"
                         className="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
-                        title="Open full order formatted message on WhatsApp to 8527296771"
+                        title="Open full order formatted message on WhatsApp to 9981508165"
                       >
                         <MessageSquare className="h-3.5 w-3.5" />
-                        <span>Send / View WhatsApp to 8527296771</span>
+                        <span>Send / View WhatsApp to 9981508165</span>
                         <ExternalLink className="h-3 w-3" />
                       </a>
                     </div>

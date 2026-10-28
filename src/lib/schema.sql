@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS public.razorpay_settings (
     test_key_secret TEXT,
     live_key_id TEXT,
     live_key_secret TEXT,
-    notification_whatsapp TEXT DEFAULT '8527296771' NOT NULL,
+    notification_whatsapp TEXT DEFAULT '9981508165' NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -111,7 +111,7 @@ ALTER TABLE public.razorpay_settings ADD COLUMN IF NOT EXISTS test_key_id TEXT;
 ALTER TABLE public.razorpay_settings ADD COLUMN IF NOT EXISTS test_key_secret TEXT;
 ALTER TABLE public.razorpay_settings ADD COLUMN IF NOT EXISTS live_key_id TEXT;
 ALTER TABLE public.razorpay_settings ADD COLUMN IF NOT EXISTS live_key_secret TEXT;
-ALTER TABLE public.razorpay_settings ADD COLUMN IF NOT EXISTS notification_whatsapp TEXT DEFAULT '8527296771';
+ALTER TABLE public.razorpay_settings ADD COLUMN IF NOT EXISTS notification_whatsapp TEXT DEFAULT '9981508165';
 
 -- Clean any dummy placeholder text from previous setups
 UPDATE public.razorpay_settings
@@ -124,7 +124,7 @@ WHERE live_key_secret LIKE '%YOUR_%' OR live_key_secret LIKE '%placeholder%';
 
 -- Seed Initial Razorpay Gateway Settings if not exists
 INSERT INTO public.razorpay_settings (id, mode, notification_whatsapp)
-VALUES ('default', 'test', '8527296771')
+VALUES ('default', 'test', '9981508165')
 ON CONFLICT (id) DO NOTHING;
 
 -- ------------------------------------------------------------------------------

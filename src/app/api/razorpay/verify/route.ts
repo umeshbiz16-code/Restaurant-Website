@@ -100,7 +100,7 @@ export async function POST(req: Request) {
       order: newOrder,
       whatsappNotification: {
         sent: true,
-        targetNumber: settings.notificationWhatsapp || '8527296771',
+        targetNumber: settings.notificationWhatsapp || '9981508165',
         link: directLink,
       }
     }, { status: 201 });
