@@ -20,7 +20,16 @@ export async function POST(req: Request) {
       deliveryCharge,
       tax,
       total,
-      specialInstructions
+      specialInstructions,
+      // Train Food Delivery integration
+      isTrainDelivery,
+      trainNumber,
+      trainName,
+      pnrNumber,
+      coachNumber,
+      berthNumber,
+      deliveryStation,
+      trainDeliveryTime,
     } = body;
 
     // Verify signature
@@ -55,12 +64,20 @@ export async function POST(req: Request) {
       createdAt: Date.now(),
       estimatedDeliveryAt: Date.now() + 30 * 60 * 1000,
       specialInstructions: specialInstructions || '',
+      isTrainDelivery: Boolean(isTrainDelivery || trainNumber),
+      trainNumber: trainNumber || undefined,
+      trainName: trainName || undefined,
+      pnrNumber: pnrNumber || undefined,
+      coachNumber: coachNumber || undefined,
+      berthNumber: berthNumber || undefined,
+      deliveryStation: deliveryStation || undefined,
+      trainDeliveryTime: trainDeliveryTime || undefined,
     };
 
     // Store in memory for instant availability
     memoryOrders.set(orderId, newOrder);
 
-    // Save to Supabase orders table with Razorpay fields
+    // Save to Supabase orders table with Razorpay & train delivery fields
     await saveOrderToSupabase({
       ...newOrder,
       customerName: newOrder.customerName,
@@ -69,6 +86,14 @@ export async function POST(req: Request) {
       razorpay_payment_id: razorpayPaymentId,
       razorpay_signature: razorpaySignature,
       whatsapp_notified: true,
+      is_train_delivery: newOrder.isTrainDelivery,
+      train_number: newOrder.trainNumber,
+      train_name: newOrder.trainName,
+      pnr_number: newOrder.pnrNumber,
+      coach_number: newOrder.coachNumber,
+      berth_number: newOrder.berthNumber,
+      delivery_station: newOrder.deliveryStation,
+      train_delivery_time: newOrder.trainDeliveryTime,
     });
 
     // WhatsApp Notification Payload
@@ -87,7 +112,15 @@ export async function POST(req: Request) {
       gatewayMode: settings.mode,
       razorpayPaymentId: razorpayPaymentId,
       specialInstructions: newOrder.specialInstructions,
-      createdAt: newOrder.createdAt
+      createdAt: newOrder.createdAt,
+      isTrainDelivery: newOrder.isTrainDelivery,
+      trainNumber: newOrder.trainNumber,
+      trainName: newOrder.trainName,
+      pnrNumber: newOrder.pnrNumber,
+      coachNumber: newOrder.coachNumber,
+      berthNumber: newOrder.berthNumber,
+      deliveryStation: newOrder.deliveryStation,
+      trainDeliveryTime: newOrder.trainDeliveryTime,
     };
 
     // Dispatch WhatsApp server notification & generate direct link for customer/admin

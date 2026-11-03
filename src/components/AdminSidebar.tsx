@@ -4,7 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
-  LayoutDashboard, UtensilsCrossed, ArrowLeft, LogOut, ClipboardList, CreditCard 
+  LayoutDashboard, UtensilsCrossed, ArrowLeft, LogOut, ClipboardList, CreditCard,
+  Train, MessageSquare 
 } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { SunMoonThemeToggle } from '@/components/ui/sun-moon-theme-toggle';
@@ -48,6 +49,18 @@ export default function AdminSidebar({ onLogout }: AdminSidebarProps) {
       href: '/admin-order',
       icon: ClipboardList,
       active: pathname === '/admin-order',
+    },
+    {
+      label: 'Train Food Deliveries',
+      href: '/admin-train-orders',
+      icon: Train,
+      active: pathname === '/admin-train-orders',
+    },
+    {
+      label: 'Special Enquiries',
+      href: '/admin-enquiries',
+      icon: MessageSquare,
+      active: pathname === '/admin-enquiries',
     },
     {
       label: 'Razorpay Gateway',

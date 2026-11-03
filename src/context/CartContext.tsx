@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { MenuItem, CartItem } from '@/lib/data';
+import { TrainDeliveryDetails } from '@/types';
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -14,12 +15,17 @@ interface CartContextType {
   deliveryCharge: number;
   tax: number;
   grandTotal: number;
+  // Train Food Delivery state
+  trainDeliveryInfo: TrainDeliveryDetails | null;
+  setTrainDeliveryInfo: (info: TrainDeliveryDetails | null) => void;
+  clearTrainDeliveryInfo: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [trainDeliveryInfo, setTrainDeliveryInfoState] = useState<TrainDeliveryDetails | null>(null);
   const [mounted, setMounted] = useState(false);
 
   // Load from localStorage on mount
@@ -34,8 +40,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           console.error('Failed to parse cart from storage:', e);
         }
       }
+
+      const savedTrain = localStorage.getItem('satvik_train_delivery');
+      if (savedTrain) {
+        try {
+          setTrainDeliveryInfoState(JSON.parse(savedTrain));
+        } catch (e) {
+          console.error('Failed to parse train delivery from storage:', e);
+        }
+      }
     }
   }, []);
+
+  const setTrainDeliveryInfo = (info: TrainDeliveryDetails | null) => {
+    setTrainDeliveryInfoState(info);
+    if (typeof window !== 'undefined') {
+      if (info) {
+        localStorage.setItem('satvik_train_delivery', JSON.stringify(info));
+      } else {
+        localStorage.removeItem('satvik_train_delivery');
+      }
+    }
+  };
+
+  const clearTrainDeliveryInfo = () => {
+    setTrainDeliveryInfoState(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('satvik_train_delivery');
+    }
+  };
 
   const saveCart = (items: CartItem[]) => {
     setCartItems(items);
@@ -112,6 +145,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         deliveryCharge,
         tax,
         grandTotal,
+        trainDeliveryInfo,
+        setTrainDeliveryInfo,
+        clearTrainDeliveryInfo,
       }}
     >
       {children}
@@ -133,6 +169,9 @@ export function useCart() {
       deliveryCharge: 0,
       tax: 0,
       grandTotal: 0,
+      trainDeliveryInfo: null,
+      setTrainDeliveryInfo: () => {},
+      clearTrainDeliveryInfo: () => {},
     };
   }
   return context;

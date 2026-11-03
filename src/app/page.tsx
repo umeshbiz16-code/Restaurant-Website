@@ -208,6 +208,61 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Spotlight Banner: Train Food Delivery & Special Culinary Enquiries */}
+        <section className="py-12 bg-amber-500/10 dark:bg-stone-900/60 border-t border-stone-200 dark:border-stone-800 transition-colors">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+              
+              {/* Train Food Delivery Card */}
+              <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-amber-200 dark:border-amber-800/80 shadow-sm flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🚆</span>
+                    <span className="text-xs uppercase font-mono font-bold text-amber-700 dark:text-amber-400">IRCTC Coach &amp; Berth Delivery</span>
+                  </div>
+                  <h3 className="text-xl font-extrabold text-stone-950 dark:text-white">
+                    Order Pure Food Directly to Your Train Berth
+                  </h3>
+                  <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
+                    Traveling through Bhopal Jn, Rani Kamlapati, or Itarsi? Enter your Train No., Coach No., and Berth No. Our delivery runner will hand-deliver fresh hot Satvik meals right at your coach gate!
+                  </p>
+                </div>
+                <Link
+                  href="/train-food-delivery"
+                  className="inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-950 font-bold py-3 px-5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-xs"
+                >
+                  <span>Order Train Food Now</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+
+              {/* Custom Special Enquiry Card */}
+              <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-emerald-200 dark:border-emerald-800/80 shadow-sm flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">📋</span>
+                    <span className="text-xs uppercase font-mono font-bold text-emerald-700 dark:text-emerald-400">Special Order Demands</span>
+                  </div>
+                  <h3 className="text-xl font-extrabold text-stone-950 dark:text-white">
+                    Have a Specific Food Demand? We Fulfill It!
+                  </h3>
+                  <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
+                    Looking for specific pure Jain meals, religious puja gatherings, customized bulk sweet boxes, or dietary requirements? Tell our kitchen admin and we will call or email you directly to arrange it.
+                  </p>
+                </div>
+                <Link
+                  href="/form-enquiry"
+                  className="inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold py-3 px-5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-xs"
+                >
+                  <span>Submit Custom Demand</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              </div>
+
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Footer */}

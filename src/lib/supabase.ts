@@ -183,6 +183,14 @@ export async function saveOrderToSupabase(order: any): Promise<boolean> {
           event_type: order.eventType,
           guest_count: order.guestCount,
           special_instructions: order.specialInstructions,
+          is_train_delivery: Boolean(order.isTrainDelivery || order.is_train_delivery),
+          train_number: order.trainNumber || order.train_number || null,
+          train_name: order.trainName || order.train_name || null,
+          pnr_number: order.pnrNumber || order.pnr_number || null,
+          coach_number: order.coachNumber || order.coach_number || null,
+          berth_number: order.berthNumber || order.berth_number || null,
+          delivery_station: order.deliveryStation || order.delivery_station || null,
+          train_delivery_time: order.trainDeliveryTime || order.train_delivery_time || null,
           created_at: new Date(order.createdAt).toISOString()
         }
       ]);
@@ -216,6 +224,204 @@ export async function saveOrderToSupabase(order: any): Promise<boolean> {
     return true;
   } catch (err) {
     console.warn('Error saving order to Supabase:', err);
+    return false;
+  }
+}
+
+// ==============================================================================
+// CUSTOMER SPECIAL ENQUIRIES HELPERS (/form-enquiry & /admin-enquiries)
+// ==============================================================================
+
+export async function saveEnquiryToSupabase(enquiry: any): Promise<boolean> {
+  const client = supabaseAdmin || supabase;
+  if (!client) return false;
+  try {
+    const { error } = await client.from('enquiries').insert([
+      {
+        id: enquiry.id,
+        customer_name: enquiry.customerName,
+        phone: enquiry.phone,
+        email: enquiry.email || null,
+        demand_details: enquiry.demandDetails,
+        dietary_preference: enquiry.dietaryPreference || 'Sattvic (No Onion-Garlic)',
+        guest_count: enquiry.guestCount || 1,
+        preferred_date: enquiry.preferredDate || null,
+        preferred_time: enquiry.preferredTime || null,
+        location: enquiry.location || null,
+        preferred_contact_method: enquiry.preferredContactMethod || 'call',
+        status: enquiry.status || 'Pending',
+        admin_notes: enquiry.adminNotes || null,
+        created_at: new Date(enquiry.createdAt || Date.now()).toISOString(),
+        updated_at: new Date(enquiry.updatedAt || Date.now()).toISOString(),
+      }
+    ]);
+    if (error) {
+      console.warn('Error saving enquiry to Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Supabase saveEnquiry exception:', err);
+    return false;
+  }
+}
+
+export async function fetchEnquiriesFromSupabase(): Promise<any[]> {
+  const client = supabaseAdmin || supabase;
+  if (!client) return [];
+  try {
+    const { data, error } = await client
+      .from('enquiries')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error || !data) return [];
+    return data.map((d: any) => ({
+      id: d.id,
+      customerName: d.customer_name,
+      phone: d.phone,
+      email: d.email,
+      demandDetails: d.demand_details,
+      dietaryPreference: d.dietary_preference,
+      guestCount: d.guest_count,
+      preferredDate: d.preferred_date,
+      preferredTime: d.preferred_time,
+      location: d.location,
+      preferredContactMethod: d.preferred_contact_method,
+      status: d.status,
+      adminNotes: d.admin_notes,
+      createdAt: new Date(d.created_at).getTime(),
+      updatedAt: new Date(d.updated_at).getTime(),
+    }));
+  } catch (err) {
+    console.warn('Supabase fetchEnquiries exception:', err);
+    return [];
+  }
+}
+
+export async function updateEnquiryInSupabase(id: string, updates: any): Promise<boolean> {
+  const client = supabaseAdmin || supabase;
+  if (!client) return false;
+  try {
+    const payload: any = {
+      updated_at: new Date().toISOString()
+    };
+    if (updates.status !== undefined) payload.status = updates.status;
+    if (updates.adminNotes !== undefined) payload.admin_notes = updates.adminNotes;
+
+    const { error } = await client
+      .from('enquiries')
+      .update(payload)
+      .eq('id', id);
+
+    return !error;
+  } catch (err) {
+    console.warn('Supabase updateEnquiry exception:', err);
+    return false;
+  }
+}
+
+export async function deleteEnquiryFromSupabase(id: string): Promise<boolean> {
+  const client = supabaseAdmin || supabase;
+  if (!client) return false;
+  try {
+    const { error } = await client.from('enquiries').delete().eq('id', id);
+    return !error;
+  } catch (err) {
+    return false;
+  }
+}
+
+// ==============================================================================
+// TRAIN FOOD DELIVERY SESSIONS HELPERS (/train-food-delivery & /admin-train-orders)
+// ==============================================================================
+
+export async function saveTrainDeliveryToSupabase(record: any): Promise<boolean> {
+  const client = supabaseAdmin || supabase;
+  if (!client) return false;
+  try {
+    const { error } = await client.from('train_deliveries').insert([
+      {
+        id: record.id,
+        train_number: record.trainNumber,
+        train_name: record.trainName || null,
+        pnr_number: record.pnrNumber || null,
+        coach_number: record.coachNumber,
+        berth_number: record.berthNumber,
+        passenger_name: record.passengerName,
+        phone: record.phone,
+        delivery_station: record.deliveryStation,
+        delivery_date: record.deliveryDate || null,
+        delivery_time: record.deliveryTime || null,
+        special_notes: record.specialNotes || null,
+        order_id: record.orderId || null,
+        status: record.status || 'Registered',
+        created_at: new Date(record.createdAt || Date.now()).toISOString(),
+        updated_at: new Date(record.updatedAt || Date.now()).toISOString(),
+      }
+    ]);
+    if (error) {
+      console.warn('Error saving train delivery to Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Supabase saveTrainDelivery exception:', err);
+    return false;
+  }
+}
+
+export async function fetchTrainDeliveriesFromSupabase(): Promise<any[]> {
+  const client = supabaseAdmin || supabase;
+  if (!client) return [];
+  try {
+    const { data, error } = await client
+      .from('train_deliveries')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error || !data) return [];
+    return data.map((d: any) => ({
+      id: d.id,
+      trainNumber: d.train_number,
+      trainName: d.train_name,
+      pnrNumber: d.pnr_number,
+      coachNumber: d.coach_number,
+      berthNumber: d.berth_number,
+      passengerName: d.passenger_name,
+      phone: d.phone,
+      deliveryStation: d.delivery_station,
+      deliveryDate: d.delivery_date,
+      deliveryTime: d.delivery_time,
+      specialNotes: d.special_notes,
+      orderId: d.order_id,
+      status: d.status,
+      createdAt: new Date(d.created_at).getTime(),
+      updatedAt: new Date(d.updated_at).getTime(),
+    }));
+  } catch (err) {
+    console.warn('Supabase fetchTrainDeliveries exception:', err);
+    return [];
+  }
+}
+
+export async function updateTrainDeliveryInSupabase(id: string, updates: any): Promise<boolean> {
+  const client = supabaseAdmin || supabase;
+  if (!client) return false;
+  try {
+    const payload: any = {
+      updated_at: new Date().toISOString()
+    };
+    if (updates.status !== undefined) payload.status = updates.status;
+    if (updates.orderId !== undefined) payload.order_id = updates.orderId;
+
+    const { error } = await client
+      .from('train_deliveries')
+      .update(payload)
+      .eq('id', id);
+
+    return !error;
+  } catch (err) {
     return false;
   }
 }

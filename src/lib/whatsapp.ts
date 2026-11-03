@@ -26,6 +26,15 @@ export interface OrderNotificationPayload {
   razorpayPaymentId?: string;
   specialInstructions?: string;
   createdAt?: number | string;
+  // Train delivery attributes
+  isTrainDelivery?: boolean;
+  trainNumber?: string;
+  trainName?: string;
+  pnrNumber?: string;
+  coachNumber?: string;
+  berthNumber?: string;
+  deliveryStation?: string;
+  trainDeliveryTime?: string;
 }
 
 export const ADMIN_WHATSAPP_NUMBER = process.env.ORDER_NOTIFY_WHATSAPP || '9981508165';
@@ -42,14 +51,34 @@ export function formatOrderWhatsAppMessage(order: OrderNotificationPayload): str
     .map((item, idx) => `  ${idx + 1}. *${item.name}* x ${item.quantity}  (₹${item.price * item.quantity})`)
     .join('\n');
 
+  const isTrain = Boolean(order.isTrainDelivery || order.trainNumber);
+
+  const trainBlock = isTrain
+    ? [
+        `🚆 *IRCTC TRAIN COACH DELIVERY DETAILS:*`,
+        `• *Train No & Name:* ${order.trainNumber || ''} ${order.trainName ? `(${order.trainName})` : ''}`,
+        `• *Coach:* ${order.coachNumber || 'N/A'}`,
+        `• *Berth / Seat:* ${order.berthNumber || 'N/A'}`,
+        `• *Delivery Station:* ${order.deliveryStation || 'N/A'}`,
+        order.pnrNumber ? `• *PNR No:* ${order.pnrNumber}` : '',
+        order.trainDeliveryTime ? `• *Arrival Time:* ${order.trainDeliveryTime}` : '',
+        ``,
+      ].filter(Boolean)
+    : [];
+
+  const headerTitle = isTrain
+    ? `🚆 *NEW TRAIN COACH SATVIK FOOD ORDER!* 🚆`
+    : `🔔 *NEW SATVIK RESTAURANT ORDER!* 🔔`;
+
   const messageLines = [
-    `🔔 *NEW SATVIK RESTAURANT ORDER!* 🔔`,
+    headerTitle,
     `------------------------------------------`,
     `📋 *Order ID:* #${order.orderId}`,
     `💳 *Payment:* PAID via Razorpay [${modeTag} Mode]`,
     order.razorpayPaymentId ? `🆔 *Payment ID:* ${order.razorpayPaymentId}` : '',
     ``,
-    `👤 *CUSTOMER DETAILS:*`,
+    ...trainBlock,
+    `👤 *PASSENGER / CUSTOMER DETAILS:*`,
     `• *Name:* ${order.customerName}`,
     `• *Phone:* ${cleanPhone}`,
     `• *Address:* ${order.address}`,
@@ -64,7 +93,9 @@ export function formatOrderWhatsAppMessage(order: OrderNotificationPayload): str
     `• *GST & Ayurvedic Packaging:* ₹${order.tax}`,
     `• *GRAND TOTAL PAID:* ₹${order.total}`,
     `------------------------------------------`,
-    `⚡ *Action Required:* Kitchen team please begin pure ghee preparation!`,
+    isTrain
+      ? `⚡ *Action Required:* Prepare food and dispatch runner to Platform / Coach Door on time!`
+      : `⚡ *Action Required:* Kitchen team please begin pure ghee preparation!`,
     `🕒 *Order Time:* ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
   ].filter(line => line !== '');
 

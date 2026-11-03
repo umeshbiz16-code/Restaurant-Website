@@ -16,7 +16,15 @@ export async function POST(req: Request) {
       upiId,
       eventType,
       guestCount,
-      specialInstructions
+      specialInstructions,
+      isTrainDelivery,
+      trainNumber,
+      trainName,
+      pnrNumber,
+      coachNumber,
+      berthNumber,
+      deliveryStation,
+      trainDeliveryTime,
     } = body;
 
     if (!customerName || !email || !phone || !address || !items || !items.length || !paymentMethod) {
@@ -66,7 +74,15 @@ export async function POST(req: Request) {
       estimatedDeliveryAt: Date.now() + (isCateringOrder ? 86400000 : 25 * 60 * 1000),
       eventType,
       guestCount,
-      specialInstructions
+      specialInstructions,
+      isTrainDelivery: Boolean(isTrainDelivery || trainNumber),
+      trainNumber,
+      trainName,
+      pnrNumber,
+      coachNumber,
+      berthNumber,
+      deliveryStation,
+      trainDeliveryTime,
     };
 
     // Store in memory

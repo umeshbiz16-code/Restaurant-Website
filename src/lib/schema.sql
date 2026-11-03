@@ -213,3 +213,90 @@ CREATE POLICY "Public read orders" ON public.orders FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Admin all orders" ON public.orders;
 CREATE POLICY "Admin all orders" ON public.orders FOR ALL USING (true);
+
+-- ------------------------------------------------------------------------------
+-- 8. CUSTOMER SPECIAL ENQUIRIES TABLE (/form-enquiry & /admin-enquiries)
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.enquiries (
+    id TEXT PRIMARY KEY, -- e.g. 'ENQ-748291'
+    customer_name TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    email TEXT,
+    demand_details TEXT NOT NULL,
+    dietary_preference TEXT DEFAULT 'Sattvic (No Onion-Garlic)',
+    guest_count INT DEFAULT 1,
+    preferred_date DATE,
+    preferred_time TEXT,
+    location TEXT,
+    preferred_contact_method TEXT DEFAULT 'call',
+    status TEXT DEFAULT 'Pending' CHECK (status IN ('Pending', 'Contacted', 'Confirmed', 'Fulfilled', 'Closed')),
+    admin_notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_enquiries_created_at ON public.enquiries (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_enquiries_status ON public.enquiries (status);
+CREATE INDEX IF NOT EXISTS idx_enquiries_phone ON public.enquiries (phone);
+
+ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public insert enquiries" ON public.enquiries;
+CREATE POLICY "Public insert enquiries" ON public.enquiries FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public read enquiries" ON public.enquiries;
+CREATE POLICY "Public read enquiries" ON public.enquiries FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Admin all enquiries" ON public.enquiries;
+CREATE POLICY "Admin all enquiries" ON public.enquiries FOR ALL USING (true);
+
+-- ------------------------------------------------------------------------------
+-- 9. TRAIN FOOD DELIVERY INTEGRATION FOR ORDERS TABLE (/train-food-delivery)
+-- ------------------------------------------------------------------------------
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS is_train_delivery BOOLEAN DEFAULT false;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS train_number TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS train_name TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS pnr_number TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS coach_number TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS berth_number TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS delivery_station TEXT;
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS train_delivery_time TEXT;
+
+CREATE INDEX IF NOT EXISTS idx_orders_train_delivery ON public.orders (is_train_delivery);
+CREATE INDEX IF NOT EXISTS idx_orders_train_number ON public.orders (train_number);
+
+-- ------------------------------------------------------------------------------
+-- 10. TRAIN DELIVERIES SESSIONS / REGISTRATIONS TABLE (/train-food-delivery)
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.train_deliveries (
+    id TEXT PRIMARY KEY, -- e.g. 'TRN-839201'
+    train_number TEXT NOT NULL,
+    train_name TEXT,
+    pnr_number TEXT,
+    coach_number TEXT NOT NULL,
+    berth_number TEXT NOT NULL,
+    passenger_name TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    delivery_station TEXT NOT NULL,
+    delivery_date DATE,
+    delivery_time TEXT,
+    special_notes TEXT,
+    order_id TEXT,
+    status TEXT DEFAULT 'Registered' CHECK (status IN ('Registered', 'Order Placed', 'Food Preparing', 'Delivered to Coach', 'Cancelled')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_train_deliveries_created_at ON public.train_deliveries (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_train_deliveries_phone ON public.train_deliveries (phone);
+
+ALTER TABLE public.train_deliveries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public insert train_deliveries" ON public.train_deliveries;
+CREATE POLICY "Public insert train_deliveries" ON public.train_deliveries FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public read train_deliveries" ON public.train_deliveries;
+CREATE POLICY "Public read train_deliveries" ON public.train_deliveries FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Admin all train_deliveries" ON public.train_deliveries;
+CREATE POLICY "Admin all train_deliveries" ON public.train_deliveries FOR ALL USING (true);

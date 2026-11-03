@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { 
   Utensils, Sparkles, Music, PartyPopper, Gift, Cake, Home, Trophy, 
-  GraduationCap, Box, Coffee, Building2, Presentation, DoorOpen, Users, Train, Phone, CheckCircle 
+  GraduationCap, Box, Coffee, Building2, Presentation, DoorOpen, Users, Train, Phone, CheckCircle, ArrowRight 
 } from 'lucide-react';
 
 export const IRCTC_DATA = [
@@ -373,6 +374,19 @@ export default function ServicesSection() {
                 <span>• Platforms: {currentStationInfo.platforms}</span>
                 <span>• Advance Booking: 30 mins prior to train arrival</span>
                 <span>• Central Kitchen: Pushpa Nagar (Bhopal)</span>
+              </div>
+
+              <div className="pt-3 border-t border-stone-200 dark:border-stone-800 flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs text-stone-500">
+                  Ready to travel? Fill train no., coach no., and berth no. to receive delivery at your seat.
+                </span>
+                <Link
+                  href="/train-food-delivery"
+                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-950 font-bold py-2.5 px-4 rounded-xl text-xs uppercase tracking-wider transition-all shadow-xs cursor-pointer"
+                >
+                  <span>Order to Your Train Coach</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             </div>
           </div>

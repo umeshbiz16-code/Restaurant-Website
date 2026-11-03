@@ -22,7 +22,9 @@ export default function CartPage() {
     subtotal, 
     deliveryCharge, 
     tax, 
-    grandTotal 
+    grandTotal,
+    trainDeliveryInfo,
+    clearTrainDeliveryInfo,
   } = useCart();
 
   // Delivery & Checkout form
@@ -35,6 +37,25 @@ export default function CartPage() {
   const [placedOrder, setPlacedOrder] = useState<any | null>(null);
   const [whatsappLink, setWhatsappLink] = useState<string>('');
   const [paymentError, setPaymentError] = useState<string | null>(null);
+
+  // Auto pre-fill if customer filled /train-food-delivery
+  React.useEffect(() => {
+    if (trainDeliveryInfo) {
+      if (trainDeliveryInfo.passengerName && !customerName) {
+        setCustomerName(trainDeliveryInfo.passengerName);
+      }
+      if (trainDeliveryInfo.passengerPhone && !phone) {
+        setPhone(trainDeliveryInfo.passengerPhone);
+      }
+      if (!address || address.startsWith('Train #')) {
+        const trainAddr = `Train #${trainDeliveryInfo.trainNumber}${trainDeliveryInfo.trainName ? ` (${trainDeliveryInfo.trainName})` : ''}, Coach: ${trainDeliveryInfo.coachNumber}, Berth/Seat: ${trainDeliveryInfo.berthNumber}, Station: ${trainDeliveryInfo.deliveryStation}`;
+        setAddress(trainAddr);
+      }
+      if (trainDeliveryInfo.specialNotes && !notes) {
+        setNotes(trainDeliveryInfo.specialNotes);
+      }
+    }
+  }, [trainDeliveryInfo]);
 
   // Validate form completeness before enabling payment
   const cleanPhone = phone.replace(/\D/g, '');
@@ -122,6 +143,14 @@ export default function CartPage() {
                   tax,
                   total: grandTotal,
                   specialInstructions: notes.trim(),
+                  isTrainDelivery: Boolean(trainDeliveryInfo),
+                  trainNumber: trainDeliveryInfo?.trainNumber,
+                  trainName: trainDeliveryInfo?.trainName,
+                  pnrNumber: trainDeliveryInfo?.pnrNumber,
+                  coachNumber: trainDeliveryInfo?.coachNumber,
+                  berthNumber: trainDeliveryInfo?.berthNumber,
+                  deliveryStation: trainDeliveryInfo?.deliveryStation,
+                  trainDeliveryTime: trainDeliveryInfo?.deliveryTime,
                 }),
               });
 
@@ -176,6 +205,14 @@ export default function CartPage() {
             tax,
             total: grandTotal,
             specialInstructions: notes.trim(),
+            isTrainDelivery: Boolean(trainDeliveryInfo),
+            trainNumber: trainDeliveryInfo?.trainNumber,
+            trainName: trainDeliveryInfo?.trainName,
+            pnrNumber: trainDeliveryInfo?.pnrNumber,
+            coachNumber: trainDeliveryInfo?.coachNumber,
+            berthNumber: trainDeliveryInfo?.berthNumber,
+            deliveryStation: trainDeliveryInfo?.deliveryStation,
+            trainDeliveryTime: trainDeliveryInfo?.deliveryTime,
           }),
         });
         const fallbackData = await fallbackRes.json();
@@ -229,6 +266,43 @@ export default function CartPage() {
                 Your pure Satvik order has been received by our Pushpa Nagar kitchen team. Preparation with pure A2 cow ghee has commenced!
               </p>
             </div>
+
+            {/* Train Coach Delivery Confirmation Badge */}
+            {(placedOrder.isTrainDelivery || placedOrder.trainNumber) && (
+              <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-left space-y-2 animate-fade-in">
+                <div className="flex items-center gap-2 text-xs font-bold text-amber-900 dark:text-amber-300">
+                  <span className="text-base">🚆</span>
+                  <span>Train Coach Delivery Confirmed!</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs pt-1">
+                  <div>
+                    <span className="text-stone-500 block text-[10px] uppercase font-bold">Train:</span>
+                    <span className="font-mono font-bold text-amber-700 dark:text-amber-400">
+                      #{placedOrder.trainNumber} {placedOrder.trainName ? `(${placedOrder.trainName})` : ''}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-stone-500 block text-[10px] uppercase font-bold">Coach &amp; Berth:</span>
+                    <span className="font-bold text-stone-900 dark:text-white">
+                      Coach {placedOrder.coachNumber} • Berth {placedOrder.berthNumber}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-stone-500 block text-[10px] uppercase font-bold">Station:</span>
+                    <span className="font-medium text-stone-900 dark:text-white">{placedOrder.deliveryStation}</span>
+                  </div>
+                  {placedOrder.pnrNumber && (
+                    <div>
+                      <span className="text-stone-500 block text-[10px] uppercase font-bold">PNR:</span>
+                      <span className="font-mono text-stone-700 dark:text-stone-300">{placedOrder.pnrNumber}</span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-[11px] text-amber-800 dark:text-amber-400 italic pt-1">
+                  Our delivery runner will contact your phone ({placedOrder.phone}) and meet you directly at your coach door!
+                </p>
+              </div>
+            )}
 
             {/* WhatsApp Notification Alert Card */}
             <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-left space-y-2">
@@ -364,6 +438,94 @@ export default function CartPage() {
               
               {/* Left Column: Delivery Address Form & Items */}
               <div className="lg:col-span-7 space-y-6">
+
+                {/* Active Train Delivery Information Card (Every detail of train coach must be there) */}
+                {trainDeliveryInfo ? (
+                  <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-50 via-white to-amber-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-amber-950/20 border-2 border-amber-400/80 dark:border-amber-600/80 shadow-md space-y-3.5 animate-fade-in">
+                    <div className="flex items-center justify-between pb-2.5 border-b border-amber-200 dark:border-amber-800">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🚆</span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-extrabold text-xs uppercase tracking-wider text-amber-950 dark:text-amber-300">
+                              IRCTC Train Coach Delivery Details
+                            </h3>
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500 text-stone-950 shadow-xs">
+                              ACTIVE
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                            Food will be hand-delivered hot to your berth door at the station
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href="/train-food-delivery"
+                          className="text-[11px] font-bold text-[#B8860B] dark:text-amber-400 hover:underline"
+                        >
+                          Edit
+                        </Link>
+                        <span className="text-stone-300 dark:text-stone-700">|</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            clearTrainDeliveryInfo();
+                            setAddress('');
+                          }}
+                          className="text-[11px] font-semibold text-stone-500 hover:text-red-500 transition-colors cursor-pointer"
+                          title="Switch to regular doorstep address"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                      <div className="p-2.5 rounded-xl bg-white/90 dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 shadow-xs">
+                        <span className="text-[10px] uppercase font-bold text-stone-400 block">Train No:</span>
+                        <span className="font-mono font-bold text-amber-800 dark:text-amber-400 block truncate">
+                          #{trainDeliveryInfo.trainNumber} {trainDeliveryInfo.trainName ? `(${trainDeliveryInfo.trainName})` : ''}
+                        </span>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-white/90 dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 shadow-xs">
+                        <span className="text-[10px] uppercase font-bold text-stone-400 block">Coach &amp; Berth:</span>
+                        <span className="font-extrabold text-stone-950 dark:text-white block">
+                          Coach {trainDeliveryInfo.coachNumber} • Seat {trainDeliveryInfo.berthNumber}
+                        </span>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-white/90 dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 shadow-xs">
+                        <span className="text-[10px] uppercase font-bold text-stone-400 block">Station:</span>
+                        <span className="font-bold text-stone-900 dark:text-white truncate block">
+                          {trainDeliveryInfo.deliveryStation}
+                        </span>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-white/90 dark:bg-stone-800 border border-stone-200/80 dark:border-stone-700 shadow-xs">
+                        <span className="text-[10px] uppercase font-bold text-stone-400 block">PNR / Time:</span>
+                        <span className="font-mono font-semibold text-stone-700 dark:text-stone-300 block truncate">
+                          {trainDeliveryInfo.pnrNumber || trainDeliveryInfo.deliveryTime || 'On Arrival'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex items-center justify-between text-xs animate-fade-in">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">🚆</span>
+                      <span className="text-stone-700 dark:text-stone-300">Traveling by train? Get delivery on your coach &amp; berth!</span>
+                    </div>
+                    <Link
+                      href="/train-food-delivery"
+                      className="font-bold text-[#B8860B] dark:text-amber-400 hover:underline flex items-center gap-1 shrink-0"
+                    >
+                      <span>Fill Train Details</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                )}
 
                 {/* Delivery Address Card */}
                 <div className="p-6 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-sm space-y-4">

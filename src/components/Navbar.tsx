@@ -19,6 +19,7 @@ export default function Navbar() {
     { label: 'Menu', href: '/menu' },
     { label: 'Starter', href: '/strater' },
     { label: 'Services', href: '/service' },
+    { label: 'Special Enquiry', href: '/form-enquiry' },
   ];
 
   const isActive = (href: string) => {
@@ -80,9 +81,25 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right Section: Cart Link, Sun-Moon Toggle, & Mobile Menu Trigger */}
-        <div className="flex items-center space-x-3 sm:space-x-4">
+        {/* Right Section: Train Delivery Button, Cart Link, Sun-Moon Toggle, & Mobile Menu Trigger */}
+        <div className="flex items-center space-x-2 sm:space-x-3.5">
           
+          {/* Train Food Delivery Button */}
+          <Link
+            href="/train-food-delivery"
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-xs border ${
+              isActive('/train-food-delivery')
+                ? 'bg-[#B8860B] text-white border-[#B8860B] shadow-amber-500/20'
+                : 'bg-amber-50/90 text-[#B8860B] border-amber-300/80 hover:bg-[#B8860B] hover:text-white dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700/60 dark:hover:bg-[#B8860B] dark:hover:text-white'
+            }`}
+            title="Order food delivery to your train coach & berth"
+            id="navbar-train-delivery-btn"
+          >
+            <span className="text-sm">🚆</span>
+            <span className="hidden sm:inline">Train Food Delivery</span>
+            <span className="sm:hidden">Train Food</span>
+          </Link>
+
           {/* Cart Icon Button linking to /cart */}
           <Link
             href="/cart"
@@ -146,6 +163,25 @@ export default function Navbar() {
               );
             })}
             
+            {/* Train Food Delivery in Mobile Drawer */}
+            <Link
+              href="/train-food-delivery"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`px-3 py-2.5 rounded-lg text-sm font-bold transition-colors flex items-center justify-between border mt-1.5 ${
+                isActive('/train-food-delivery')
+                  ? 'bg-[#B8860B] text-white border-[#B8860B]'
+                  : 'bg-amber-500/10 text-[#B8860B] border-amber-300 dark:border-amber-700 hover:bg-amber-500 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <span className="text-base">🚆</span>
+                <span>Train Food Delivery</span>
+              </div>
+              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-[#B8860B] dark:text-amber-300 font-bold">
+                Coach Drop
+              </span>
+            </Link>
+
             {/* Cart Link in Mobile Navigation */}
             <Link
               href="/cart"

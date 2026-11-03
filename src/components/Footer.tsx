@@ -80,6 +80,16 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/train-food-delivery" className="hover:text-[#B8860B] dark:hover:text-amber-400 transition-colors flex items-center gap-1 text-amber-700 dark:text-amber-400 font-bold">
+                  <span>🚆 Train Food Delivery</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/form-enquiry" className="hover:text-[#B8860B] dark:hover:text-amber-400 transition-colors flex items-center gap-1">
+                  <span>📋 Special Order Enquiry</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/cart" className="hover:text-[#B8860B] dark:hover:text-amber-400 transition-colors">
                   My Cart & Checkout
                 </Link>

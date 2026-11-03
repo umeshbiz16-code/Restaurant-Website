@@ -35,6 +35,14 @@ export async function GET() {
           createdAt: new Date(d.created_at).getTime(),
           eventType: d.event_type,
           guestCount: d.guest_count,
+          isTrainDelivery: Boolean(d.is_train_delivery || d.train_number),
+          trainNumber: d.train_number,
+          trainName: d.train_name,
+          pnrNumber: d.pnr_number,
+          coachNumber: d.coach_number,
+          berthNumber: d.berth_number,
+          deliveryStation: d.delivery_station,
+          trainDeliveryTime: d.train_delivery_time,
         }));
         return NextResponse.json(mapped);
       }

@@ -40,6 +40,14 @@ interface OrderRecord {
   specialInstructions?: string;
   whatsappNotified?: boolean;
   createdAt: number;
+  isTrainDelivery?: boolean;
+  trainNumber?: string;
+  trainName?: string;
+  pnrNumber?: string;
+  coachNumber?: string;
+  berthNumber?: string;
+  deliveryStation?: string;
+  trainDeliveryTime?: string;
 }
 
 export default function AdminOrderPage() {
@@ -110,13 +118,21 @@ export default function AdminOrderPage() {
 
   // Filtered orders
   const filteredOrders = orders.filter(order => {
-    const matchesStatus = statusFilter === 'ALL' || order.status === statusFilter;
+    const matchesStatus =
+      statusFilter === 'ALL'
+        ? true
+        : statusFilter === 'TRAIN'
+        ? Boolean(order.isTrainDelivery || order.trainNumber)
+        : order.status === statusFilter;
+
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch = !q ||
       order.id.toLowerCase().includes(q) ||
       order.customerName.toLowerCase().includes(q) ||
       order.phone.includes(q) ||
-      (order.address && order.address.toLowerCase().includes(q));
+      (order.address && order.address.toLowerCase().includes(q)) ||
+      (order.trainNumber && order.trainNumber.toLowerCase().includes(q)) ||
+      (order.coachNumber && order.coachNumber.toLowerCase().includes(q));
 
     return matchesStatus && matchesSearch;
   });
@@ -217,7 +233,7 @@ export default function AdminOrderPage() {
 
             {/* Status Filter Buttons */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-              {['ALL', 'Placed', 'Chef Preparing', 'Out for Delivery', 'Delivered'].map((tab) => (
+              {['ALL', 'TRAIN', 'Placed', 'Chef Preparing', 'Out for Delivery', 'Delivered'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setStatusFilter(tab)}
@@ -227,7 +243,7 @@ export default function AdminOrderPage() {
                       : 'bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 hover:text-stone-950 dark:hover:text-white'
                   }`}
                 >
-                  {tab}
+                  {tab === 'TRAIN' ? '🚆 Train Orders' : tab}
                 </button>
               ))}
             </div>
@@ -296,6 +312,17 @@ export default function AdminOrderPage() {
                         <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
                           {order.paymentStatus || 'PAID'}
                         </span>
+
+                        {/* Train Coach Delivery Badge */}
+                        {(order.isTrainDelivery || order.trainNumber) && (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-stone-950 flex items-center gap-1 shadow-xs">
+                            <span>🚆 Train #{order.trainNumber}</span>
+                            <span>•</span>
+                            <span>Coach {order.coachNumber || 'N/A'}</span>
+                            <span>•</span>
+                            <span>Seat {order.berthNumber || 'N/A'}</span>
+                          </span>
+                        )}
 
                         {order.razorpayPaymentId && (
                           <span className="text-[11px] font-mono text-stone-400">

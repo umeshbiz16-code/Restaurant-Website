@@ -47,7 +47,7 @@ export interface Order {
   deliveryCharge: number;
   tax: number;
   total: number;
-  status: "Placed" | "Chef Preparing" | "Quality Check" | "Out for Delivery" | "Delivered" | "Cancelled" | string;
+  status: "Placed" | "Chef Preparing" | "Quality Check" | "Out for Delivery" | "Delivered" | "Runner at Platform" | "Delivered to Berth" | "Cancelled" | string;
   paymentMethod: "Razorpay" | "Card" | "UPI" | "NetBanking" | "Cash on Delivery" | string;
   paymentStatus: "Pending" | "Paid" | "Failed" | string;
   gatewayMode?: "test" | "live";
@@ -61,6 +61,54 @@ export interface Order {
   eventType?: string;
   guestCount?: number;
   specialInstructions?: string;
+  // Train delivery attributes
+  isTrainDelivery?: boolean;
+  trainNumber?: string;
+  trainName?: string;
+  pnrNumber?: string;
+  coachNumber?: string;
+  berthNumber?: string;
+  deliveryStation?: string;
+  trainDeliveryTime?: string;
+}
+
+export type EnquiryStatus = "Pending" | "Contacted" | "Confirmed" | "Fulfilled" | "Closed";
+
+export interface Enquiry {
+  id: string; // e.g. ENQ-109283
+  customerName: string;
+  phone: string;
+  email?: string;
+  demandDetails: string;
+  dietaryPreference?: string;
+  guestCount?: number;
+  preferredDate?: string;
+  preferredTime?: string;
+  location?: string;
+  preferredContactMethod?: "call" | "email" | "whatsapp" | "any";
+  status: EnquiryStatus;
+  adminNotes?: string;
+  createdAt: number;
+  updatedAt?: number;
+}
+
+export interface TrainDeliveryRecord {
+  id: string; // e.g. TRN-109283
+  trainNumber: string;
+  trainName?: string;
+  pnrNumber?: string;
+  coachNumber: string;
+  berthNumber: string;
+  passengerName: string;
+  phone: string;
+  deliveryStation: string;
+  deliveryDate?: string;
+  deliveryTime?: string;
+  specialNotes?: string;
+  orderId?: string;
+  status: "Registered" | "Order Placed" | "Food Preparing" | "Delivered to Coach" | "Cancelled";
+  createdAt: number;
+  updatedAt?: number;
 }
 
 export const DEFAULT_MENU_ITEMS: MenuItem[] = [
@@ -339,8 +387,12 @@ export const DEFAULT_KILO_DISHES: KiloDish[] = [
 
 // Global in-memory cache for orders (survives across requests in Node runtime)
 const globalOrdersMap = new Map<string, Order>();
+const globalEnquiriesMap = new Map<string, Enquiry>();
+const globalTrainDeliveriesMap = new Map<string, TrainDeliveryRecord>();
 
 export const memoryOrders = globalOrdersMap;
+export const memoryEnquiries = globalEnquiriesMap;
+export const memoryTrainDeliveries = globalTrainDeliveriesMap;
 
 export const updateOrderStatus = (order: Order): Order["status"] => {
   return order.status || "Placed";
