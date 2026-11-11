@@ -77,7 +77,7 @@ export default function OrderTracker({ searchedOrderId, setSearchedOrderId }: Or
     {
       status: "Chef Preparing",
       label: "Vedic Cooking",
-      desc: "Slow-cooking with A2 ghee and meditation chanting.",
+      desc: "Slow-cooking with pure desi ghee and meditation chanting.",
       icon: <Utensils className="h-5 w-5" />
     },
     {

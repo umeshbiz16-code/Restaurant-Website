@@ -13,6 +13,10 @@ import {
 } from 'lucide-react';
 
 const POPULAR_STATIONS = [
+  'Bhopal Station (Main)',
+  'Rain Kamlapati Station',
+  'Sant Hirdaram Nagar',
+  'Nishatpura',
   'Bhopal Junction (BPL)',
   'Rani Kamlapati / Habibganj (RKMP)',
   'Itarsi Junction (ET)',
@@ -70,6 +74,15 @@ export default function TrainFoodDeliveryPage() {
       // Set default date to today
       const today = new Date().toISOString().split('T')[0];
       setDeliveryDate(today);
+    }
+
+    // Check if station query param is passed from Navbar hover
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const stationParam = params.get('station');
+      if (stationParam) {
+        setDeliveryStation(stationParam);
+      }
     }
   }, [trainDeliveryInfo]);
 
@@ -151,7 +164,7 @@ export default function TrainFoodDeliveryPage() {
       setSuccessData(data.record || payload);
       setCountdown(3);
     } catch (err: any) {
-      setErrorMessage(err.message || 'Error registering train food delivery');
+      setErrorMessage(err.message || 'Error registering food delivery in train');
     } finally {
       setSubmitting(false);
     }
@@ -182,7 +195,7 @@ export default function TrainFoodDeliveryPage() {
         {/* Process Flow Roadmap (4 Clear Steps) */}
         <div className="mb-10 p-5 rounded-3xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 shadow-xs">
           <p className="text-[11px] font-bold uppercase tracking-wider text-stone-400 text-center mb-4 font-mono">
-            How Train Food Delivery Works
+            How Food delivery in Train Works
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             

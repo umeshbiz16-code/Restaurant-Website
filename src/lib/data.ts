@@ -116,7 +116,7 @@ export const DEFAULT_MENU_ITEMS: MenuItem[] = [
   {
     id: "m1",
     name: "Maharaja Satvik Thali",
-    description: "A divine royal thali with Basmati cumin rice, Panchamel Dal, Shahi Paneer, seasonal dry sabji, fresh butter rotis, cucumber raita, and premium Rasgulla. Prepared in pure A2 ghee.",
+    description: "A divine royal thali with Basmati cumin rice, Panchamel Dal, Shahi Paneer, seasonal dry sabji, fresh butter rotis, cucumber raita, and premium Rasgulla. Prepared in pure desi ghee.",
     price: 349,
     category: "Mains",
     image: "/images/satvik_premium_thali_1783699387370.jpg",
@@ -182,7 +182,7 @@ export const DEFAULT_MENU_ITEMS: MenuItem[] = [
   {
     id: "m6",
     name: "Ayurvedic Panchamel Dal",
-    description: "A nourishing mixture of five high-protein lentils tempered with pure organic A2 cow ghee, cumin seeds, fresh grated ginger, and healing digestive spices.",
+    description: "A nourishing mixture of five high-protein lentils tempered with pure organic desi ghee, cumin seeds, fresh grated ginger, and healing digestive spices.",
     price: 189,
     category: "Mains",
     image: "/images/panchamel_dal_1785510045096.jpg",

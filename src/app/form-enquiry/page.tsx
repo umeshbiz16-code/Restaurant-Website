@@ -135,8 +135,8 @@ export default function FormEnquiryPage() {
               <ShieldCheck className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-stone-900 dark:text-white">100% Pure Satvik &amp; Jain</h3>
-              <p className="text-[11px] text-stone-500 dark:text-stone-400">Desi A2 cow ghee, rock salt</p>
+              <h3 className="text-xs font-bold text-stone-950 dark:text-white">100% Pure Satvik &amp; Jain</h3>
+              <p className="text-[11px] text-stone-500 dark:text-stone-400">Pure desi ghee, rock salt</p>
             </div>
           </div>
         </div>

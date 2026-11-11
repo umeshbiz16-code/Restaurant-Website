@@ -8,6 +8,13 @@ import { useCart } from '@/context/CartContext';
 import { SunMoonThemeToggle } from '@/components/ui/sun-moon-theme-toggle';
 import { Menu as MenuIcon, X, ShoppingBag } from 'lucide-react';
 
+const TRAIN_STATIONS = [
+  { name: 'Bhopal Station (Main)', code: 'BPL' },
+  { name: 'Rain Kamlapati Station', code: 'RKMP' },
+  { name: 'Sant Hirdaram Nagar', code: 'SHRN' },
+  { name: 'Nishatpura', code: 'NSZ' },
+];
+
 export default function Navbar() {
   const pathname = usePathname();
   const { theme } = useTheme();
@@ -81,39 +88,55 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right Section: Train Delivery Button, Cart Link, Sun-Moon Toggle, & Mobile Menu Trigger */}
+        {/* Right Section: Train Delivery Button (with stations hover tooltip), Sun-Moon Toggle, & Mobile Menu Trigger */}
         <div className="flex items-center space-x-2 sm:space-x-3.5">
           
-          {/* Train Food Delivery Button */}
-          <Link
-            href="/train-food-delivery"
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-xs border ${
-              isActive('/train-food-delivery')
-                ? 'bg-[#B8860B] text-white border-[#B8860B] shadow-amber-500/20'
-                : 'bg-amber-50/90 text-[#B8860B] border-amber-300/80 hover:bg-[#B8860B] hover:text-white dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700/60 dark:hover:bg-[#B8860B] dark:hover:text-white'
-            }`}
-            title="Order food delivery to your train coach & berth"
-            id="navbar-train-delivery-btn"
-          >
-            <span className="text-sm">🚆</span>
-            <span className="hidden sm:inline">Train Food Delivery</span>
-            <span className="sm:hidden">Train Food</span>
-          </Link>
+          {/* Food delivery in Train Button with Hover Railway Stations Dropdown */}
+          <div className="relative group">
+            <Link
+              href="/train-food-delivery"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all shadow-xs border ${
+                isActive('/train-food-delivery')
+                  ? 'bg-[#B8860B] text-white border-[#B8860B] shadow-amber-500/20'
+                  : 'bg-amber-50/90 text-[#B8860B] border-amber-300/80 hover:bg-[#B8860B] hover:text-white dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700/60 dark:hover:bg-[#B8860B] dark:hover:text-white'
+              }`}
+              title="Order food delivery to your train coach & berth"
+              id="navbar-train-delivery-btn"
+            >
+              <span className="text-sm">🚆</span>
+              <span className="hidden sm:inline">Food delivery in Train</span>
+              <span className="sm:hidden">Train Food</span>
+            </Link>
 
-          {/* Cart Icon Button linking to /cart */}
-          <Link
-            href="/cart"
-            className="relative flex items-center justify-center p-2 rounded-full text-stone-700 hover:text-[#B8860B] hover:bg-amber-50 dark:text-stone-300 dark:hover:text-amber-400 dark:hover:bg-amber-950/40 transition-colors"
-            title="View Cart"
-            id="navbar-cart-btn"
-          >
-            <ShoppingBag className="h-5 w-5" />
-            {totalCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4.5 min-w-4.5 px-1 items-center justify-center rounded-full bg-[#B8860B] text-[10px] font-bold text-white shadow-xs">
-                {totalCount}
-              </span>
-            )}
-          </Link>
+            {/* Hover Tooltip / Dropdown: Railway Stations */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-64 bg-white dark:bg-stone-900 border-2 border-amber-400 dark:border-amber-600 rounded-2xl p-3 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-auto">
+              <div className="text-[10px] uppercase font-bold tracking-wider text-amber-700 dark:text-amber-400 font-mono pb-1.5 mb-1.5 border-b border-amber-100 dark:border-stone-800 flex items-center justify-between">
+                <span>🚆 Railway Stations Served</span>
+                <span className="text-[9px] bg-amber-500/20 text-amber-800 dark:text-amber-300 px-1.5 py-0.5 rounded font-bold">Coach Drop</span>
+              </div>
+              <ul className="space-y-1">
+                {TRAIN_STATIONS.map((st) => (
+                  <li key={st.name}>
+                    <Link
+                      href={`/train-food-delivery?station=${encodeURIComponent(st.name)}`}
+                      className="flex items-center justify-between p-1.5 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-950/60 text-xs font-semibold text-stone-800 dark:text-stone-200 hover:text-[#B8860B] dark:hover:text-amber-400 transition-colors"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs">📍</span>
+                        <span>{st.name}</span>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-950 px-1.5 py-0.5 rounded">
+                        {st.code}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-2 pt-2 border-t border-amber-100 dark:border-stone-800 text-[10px] text-stone-500 dark:text-stone-400 text-center font-medium">
+                Piping-hot Satvik thalis delivered to your seat
+              </div>
+            </div>
+          </div>
 
           {/* Animated Sun-Moon Toggle Component */}
           <div className="flex items-center">
@@ -163,24 +186,35 @@ export default function Navbar() {
               );
             })}
             
-            {/* Train Food Delivery in Mobile Drawer */}
-            <Link
-              href="/train-food-delivery"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`px-3 py-2.5 rounded-lg text-sm font-bold transition-colors flex items-center justify-between border mt-1.5 ${
-                isActive('/train-food-delivery')
-                  ? 'bg-[#B8860B] text-white border-[#B8860B]'
-                  : 'bg-amber-500/10 text-[#B8860B] border-amber-300 dark:border-amber-700 hover:bg-amber-500 hover:text-white'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <span className="text-base">🚆</span>
-                <span>Train Food Delivery</span>
+            {/* Food delivery in Train in Mobile Drawer with Railway Stations */}
+            <div className="rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-500/10 p-2.5 space-y-2 mt-1.5">
+              <Link
+                href="/train-food-delivery"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between text-sm font-bold text-[#B8860B] dark:text-amber-300"
+              >
+                <div className="flex items-center space-x-2">
+                  <span className="text-base">🚆</span>
+                  <span>Food delivery in Train</span>
+                </div>
+                <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-[#B8860B] dark:text-amber-300 font-bold">
+                  Coach Drop
+                </span>
+              </Link>
+              <div className="pt-1.5 border-t border-amber-200 dark:border-amber-800/60 grid grid-cols-2 gap-1 text-[11px] font-medium text-stone-700 dark:text-stone-300">
+                {TRAIN_STATIONS.map((st) => (
+                  <Link
+                    key={st.name}
+                    href={`/train-food-delivery?station=${encodeURIComponent(st.name)}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-1 hover:text-[#B8860B] transition-colors truncate"
+                  >
+                    <span>📍</span>
+                    <span className="truncate">{st.name}</span>
+                  </Link>
+                ))}
               </div>
-              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-[#B8860B] dark:text-amber-300 font-bold">
-                Coach Drop
-              </span>
-            </Link>
+            </div>
 
             {/* Cart Link in Mobile Navigation */}
             <Link

@@ -488,7 +488,7 @@ export default function AdminMenuPage() {
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Ingredients, preparation with pure A2 ghee, ayurvedic healing notes..."
+                  placeholder="Ingredients, preparation with pure desi ghee, ayurvedic healing notes..."
                   className="w-full px-3 py-2 rounded-xl bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-900 dark:text-white text-xs focus:outline-none focus:border-amber-500"
                 />
               </div>

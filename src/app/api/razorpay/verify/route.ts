@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       tax,
       total,
       specialInstructions,
-      // Train Food Delivery integration
+      // Food delivery in Train integration
       isTrainDelivery,
       trainNumber,
       trainName,
@@ -133,7 +133,7 @@ export async function POST(req: Request) {
       order: newOrder,
       whatsappNotification: {
         sent: true,
-        targetNumber: settings.notificationWhatsapp || '9981508165',
+        targetNumber: '9981508165',
         link: directLink,
       }
     }, { status: 201 });

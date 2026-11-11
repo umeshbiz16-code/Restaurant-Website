@@ -39,7 +39,7 @@ export default function HomePage() {
                 Our Signature Offerings
               </h2>
               <p className="text-sm text-stone-600 dark:text-stone-400 max-w-2xl mx-auto">
-                Handcrafted pure vegetarian dining prepared in traditional copper and clay vessels with pure A2 cow ghee.
+                Handcrafted pure vegetarian dining prepared in traditional copper and clay vessels with pure desi ghee.
               </p>
             </div>
 
@@ -62,7 +62,7 @@ export default function HomePage() {
                     Royal Satvik Thalis
                   </h3>
                   <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed mb-6 font-sans">
-                    Taste our signature Maharaja & Premium Thalis. Cooked strictly without garlic or onion, using mineral-rich rock salt, organic herbs, and wood-churned pure A2 ghee.
+                    Taste our signature Maharaja & Premium Thalis. Cooked strictly without garlic or onion, using mineral-rich rock salt, organic herbs, and wood-churned pure desi ghee.
                   </p>
                 </div>
                 <Link
@@ -166,7 +166,7 @@ export default function HomePage() {
                   <div className="flex items-start space-x-3 p-3.5 rounded-lg bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800">
                     <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-xs font-bold text-stone-950 dark:text-white">Pure Wood-Churned A2 Ghee</h4>
+                      <h4 className="text-xs font-bold text-stone-950 dark:text-white">Pure Wood-Churned Desi Ghee</h4>
                       <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Crafted with pure indigenous cow ghee.</p>
                     </div>
                   </div>
@@ -209,12 +209,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Spotlight Banner: Train Food Delivery & Special Culinary Enquiries */}
+        {/* Spotlight Banner: Food delivery in Train & Special Culinary Enquiries */}
         <section className="py-12 bg-amber-500/10 dark:bg-stone-900/60 border-t border-stone-200 dark:border-stone-800 transition-colors">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               
-              {/* Train Food Delivery Card */}
+              {/* Food delivery in Train Card */}
               <div className="p-6 rounded-3xl bg-white dark:bg-stone-900 border border-amber-200 dark:border-amber-800/80 shadow-sm flex flex-col justify-between space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">

@@ -81,7 +81,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/train-food-delivery" className="hover:text-[#B8860B] dark:hover:text-amber-400 transition-colors flex items-center gap-1 text-amber-700 dark:text-amber-400 font-bold">
-                  <span>🚆 Train Food Delivery</span>
+                  <span>🚆 Food delivery in Train</span>
                 </Link>
               </li>
               <li>
@@ -113,7 +113,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 mr-2 shrink-0" />
-                Hand-Churned Pure A2 Cow Ghee
+                Hand-Churned Pure Desi Ghee
               </li>
               <li className="flex items-center">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 mr-2 shrink-0" />

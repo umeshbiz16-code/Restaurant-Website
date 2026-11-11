@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS public.categories (
 INSERT INTO public.categories (name, slug, description, display_order)
 VALUES 
     ('Starters', 'starters', 'Clay oven tandoori kebabs and tikkas', 1),
-    ('Mains', 'mains', 'Sacred curries cooked in hand-churned A2 desi ghee', 2),
+    ('Mains', 'mains', 'Sacred curries cooked in hand-churned pure desi ghee', 2),
     ('Sweets', 'sweets', 'Pure ghee sweets and desserts', 3),
     ('Catering', 'catering', 'Luxury wedding, satsang, and event packages', 4)
 ON CONFLICT (name) DO NOTHING;

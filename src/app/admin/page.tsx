@@ -399,7 +399,7 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* Quick Panels for New Features: Train Food Delivery & Special Enquiries */}
+          {/* Quick Panels for New Features: Food delivery in Train & Special Enquiries */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             
             {/* Train Food Deliveries Card */}

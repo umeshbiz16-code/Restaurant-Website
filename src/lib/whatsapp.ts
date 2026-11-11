@@ -37,7 +37,8 @@ export interface OrderNotificationPayload {
   trainDeliveryTime?: string;
 }
 
-export const ADMIN_WHATSAPP_NUMBER = process.env.ORDER_NOTIFY_WHATSAPP || '9981508165';
+// ALWAYS AND ONLY DISPATCH ORDER & PAYMENT DETAIL TO ADMIN NO. 9981508165
+export const ADMIN_WHATSAPP_NUMBER = '9981508165';
 
 /**
  * Formats a clean, professional, readable WhatsApp order alert message
@@ -103,15 +104,52 @@ export function formatOrderWhatsAppMessage(order: OrderNotificationPayload): str
 }
 
 /**
- * Generates direct wa.me URL to send message to target admin WhatsApp number (9981508165)
+ * Generates direct wa.me URL to send full order & payment detail strictly and ALWAYS to Admin (9981508165)
  */
 export function generateWhatsAppDirectLink(
   order: OrderNotificationPayload,
-  recipientNumber: string = ADMIN_WHATSAPP_NUMBER
+  _recipientNumber?: string
 ): string {
-  const rawNumber = recipientNumber.replace(/\D/g, '');
-  const internationalNumber = rawNumber.length === 10 ? `91${rawNumber}` : rawNumber;
+  // Always strictly target Admin number 9981508165
+  const internationalNumber = `91${ADMIN_WHATSAPP_NUMBER}`;
   const message = formatOrderWhatsAppMessage(order);
+  return `https://api.whatsapp.com/send?phone=${internationalNumber}&text=${encodeURIComponent(message)}`;
+}
+
+/**
+ * Formats a clean customer Thanks of order message with items and Rs.
+ */
+export function formatCustomerThanksMessage(order: OrderNotificationPayload): string {
+  const itemsList = order.items
+    .map((item, idx) => `${idx + 1}. *${item.name}* × ${item.quantity || 1} (₹${item.price * (item.quantity || 1)})`)
+    .join('\n');
+
+  return [
+    `🙏 *NAMASTE ${order.customerName.toUpperCase()}!*`,
+    `Thank you for placing your order with *Satvik Caters and Events*!`,
+    ``,
+    `📋 *ORDERED ITEMS:*`,
+    itemsList,
+    ``,
+    `💰 *THANKS OF ORDER FOR: ₹${order.total}*`,
+    `• *Payment Status:* Paid successfully via Razorpay`,
+    `• *Order Reference:* #${order.orderId}`,
+    order.isTrainDelivery || order.trainNumber
+      ? `🚆 *Train Coach Drop:* Train #${order.trainNumber}, Coach ${order.coachNumber}, Berth ${order.berthNumber} at ${order.deliveryStation}`
+      : `📍 *Delivery Address:* ${order.address}`,
+    ``,
+    `✨ Your pure Satvik food is being freshly prepared with pure desi ghee. Our team will deliver it hot and on time!`,
+    `📞 *Helpline / Owner Manish Jaiswal:* +91 9981508165`,
+  ].join('\n');
+}
+
+/**
+ * Generates direct wa.me URL to send customer Thanks message to customer's phone number
+ */
+export function generateCustomerThanksWhatsAppLink(order: OrderNotificationPayload): string {
+  const rawNumber = (order.phone || '').replace(/\D/g, '');
+  const internationalNumber = rawNumber.length === 10 ? `91${rawNumber}` : rawNumber;
+  const message = formatCustomerThanksMessage(order);
   return `https://api.whatsapp.com/send?phone=${internationalNumber}&text=${encodeURIComponent(message)}`;
 }
 

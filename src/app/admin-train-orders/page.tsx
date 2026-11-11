@@ -317,7 +317,7 @@ export default function AdminTrainOrdersPage() {
                 const cleanPhone = (rec.phone || '').replace(/\D/g, '');
                 const waPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
                 const waText = encodeURIComponent(
-                  `Namaste ${rec.passengerName}! This is Satvik Caters Kitchen. We have received your train food delivery for Train #${rec.trainNumber}, Coach ${rec.coachNumber}, Berth ${rec.berthNumber} at ${rec.deliveryStation}. Our runner is preparing fresh hot food!`
+                  `Namaste ${rec.passengerName}! This is Satvik Caters Kitchen. We have received your food delivery in train for Train #${rec.trainNumber}, Coach ${rec.coachNumber}, Berth ${rec.berthNumber} at ${rec.deliveryStation}. Our runner is preparing fresh hot food!`
                 );
 
                 return (

@@ -60,7 +60,7 @@ export interface Order {
   eventType?: string;
   guestCount?: number;
   specialInstructions?: string;
-  // Train Food Delivery integration fields
+  // Food delivery in Train integration fields
   isTrainDelivery?: boolean;
   trainNumber?: string;
   trainName?: string;

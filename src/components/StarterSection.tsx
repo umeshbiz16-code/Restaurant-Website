@@ -70,7 +70,7 @@ export const STARTERS_DATA: MenuItem[] = [
   {
     id: "st6",
     name: "Stuffed Tandoori Aloo",
-    description: "Hollowed baby potatoes filled with spiced paneer, chopped cashews, and raisins, roasted in charcoal embers and basted with A2 cow ghee.",
+    description: "Hollowed baby potatoes filled with spiced paneer, chopped cashews, and raisins, roasted in charcoal embers and basted with pure desi ghee.",
     price: 220,
     category: "Starters",
     image: "/images/fresh_kitchen_herbs.jpg",
@@ -132,7 +132,7 @@ export default function StarterSection({ onAddToCart }: StarterSectionProps) {
             Sacred <span className="text-orange-500">Tandoori Starters</span>
           </h1>
           <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400">
-            Slow-roasted on natural clay ovens, basted in Gir Cow A2 ghee with hand-pounded mountain spices.
+            Slow-roasted on natural clay ovens, basted in pure desi ghee with hand-pounded mountain spices.
           </p>
         </div>
 

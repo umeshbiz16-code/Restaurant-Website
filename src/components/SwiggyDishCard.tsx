@@ -113,7 +113,7 @@ export default function SwiggyDishCard({ dish, onSeeInside }: SwiggyDishCardProp
             </button>
             <span className="text-xs font-extrabold px-2">{quantity} in Cart</span>
             <button
-              onClick={() => updateQuantity(dish.id, quantity + 1)}
+              onClick={(e) => addToCart(dish, 1, e)}
               className="p-1 hover:bg-amber-600 rounded transition-colors cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5 text-stone-950 font-bold" />
@@ -122,7 +122,7 @@ export default function SwiggyDishCard({ dish, onSeeInside }: SwiggyDishCardProp
         ) : (
           <button
             type="button"
-            onClick={() => addToCart(dish, 1)}
+            onClick={(e) => addToCart(dish, 1, e)}
             className="flex-1 py-2 px-3 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-950 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer active:scale-98"
           >
             <Plus className="h-3.5 w-3.5" />

@@ -57,7 +57,7 @@ export default function MenuSection({
             Our Divine <span className="text-[#B8860B] dark:text-amber-400">Satvik Menu</span>
           </h1>
           <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400">
-            Cooked with wood-churned pure A2 cow ghee, natural pink rock salt, and positive Vedic vibrations.
+            Cooked with wood-churned pure desi ghee, natural pink rock salt, and positive Vedic vibrations.
           </p>
         </div>
 

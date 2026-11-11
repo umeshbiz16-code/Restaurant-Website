@@ -39,7 +39,7 @@ export default function HeroSection({ onOrderClick, onCateringClick, onWatchVide
             </h1>
 
             <p className="mx-auto lg:mx-0 max-w-2xl text-xs sm:text-sm text-gray-600 dark:text-stone-300 leading-relaxed tracking-wide font-sans">
-              Experience the sublime art of Satvik fine dining. We prepare pure, traditional Indian vegetarian cuisine cooked strictly without onion, garlic, or mushrooms. Every meal is slowly cooked using wood-churned pure A2 cow ghee, mineral-rich Himalayan rock salt, and organic ingredients, accompanied by positive mantra chanting to nurture mental clarity, health, and spiritual harmony.
+              Experience the sublime art of Satvik fine dining. We prepare pure, traditional Indian vegetarian cuisine cooked strictly without onion, garlic, or mushrooms. Every meal is slowly cooked using wood-churned pure desi ghee, mineral-rich Himalayan rock salt, and organic ingredients, accompanied by positive mantra chanting to nurture mental clarity, health, and spiritual harmony.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
@@ -71,7 +71,7 @@ export default function HeroSection({ onOrderClick, onCateringClick, onWatchVide
                 </span>
               </div>
               <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-                <span className="font-serif text-3xl font-bold text-[#B8860B]">A2 Ghee</span>
+                <span className="font-serif text-3xl font-bold text-[#B8860B]">Pure Ghee</span>
                 <span className="text-[10px] uppercase tracking-widest text-gray-600 dark:text-stone-400 flex items-center mt-1 font-semibold">
                   <ShieldCheck className="h-3 w-3 text-[#B8860B] mr-1" />
                   Wood-Churned Pure Ghee

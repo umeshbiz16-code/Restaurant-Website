@@ -32,8 +32,8 @@ export default function DishDetailModal({
     .filter((d) => d.category === dish.category && d.id !== dish.id)
     .slice(0, 3);
 
-  const handleAddCurrent = () => {
-    addToCart(dish, qty);
+  const handleAddCurrent = (e?: React.MouseEvent) => {
+    addToCart(dish, qty, e);
     setAddedToast(true);
     setTimeout(() => setAddedToast(false), 2000);
   };
@@ -64,7 +64,7 @@ export default function DishDetailModal({
           />
           <div className="absolute top-4 left-4 bg-white/95 dark:bg-stone-950/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-amber-900 dark:text-amber-300 shadow-sm flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Pure A2 Cow Ghee Preparation</span>
+            <span>Pure Desi Ghee Preparation</span>
           </div>
           <div className="absolute bottom-4 left-4 bg-black/75 backdrop-blur-md px-3 py-1 rounded-lg text-white font-extrabold text-lg">
             ₹{dish.price}
@@ -115,7 +115,7 @@ export default function DishDetailModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="flex items-start space-x-2 p-2.5 rounded-lg bg-stone-50 dark:bg-stone-800/50">
               <Check className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-              <span>Wood-churned Gir Cow A2 Ghee</span>
+              <span>Wood-churned Pure Desi Ghee</span>
             </div>
             <div className="flex items-start space-x-2 p-2.5 rounded-lg bg-stone-50 dark:bg-stone-800/50">
               <Check className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
@@ -155,7 +155,7 @@ export default function DishDetailModal({
 
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
-              onClick={handleAddCurrent}
+              onClick={(e) => handleAddCurrent(e)}
               className="flex-1 sm:flex-none py-3 px-6 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-stone-950 font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-98"
             >
               <ShoppingBag className="h-4 w-4" />

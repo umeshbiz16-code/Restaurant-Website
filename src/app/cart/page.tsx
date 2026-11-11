@@ -11,7 +11,7 @@ import {
   MapPin, Phone, User, CheckCircle2, Clock, Sparkles, AlertCircle,
   CreditCard, MessageSquare, ExternalLink, RefreshCw 
 } from 'lucide-react';
-import { generateWhatsAppDirectLink } from '@/lib/whatsapp';
+import { generateWhatsAppDirectLink, generateCustomerThanksWhatsAppLink } from '@/lib/whatsapp';
 
 export default function CartPage() {
   const { 
@@ -260,11 +260,49 @@ export default function CartPage() {
                 <span>Payment Confirmed via Razorpay</span>
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-950 dark:text-white">
-                Thank You, {placedOrder.customerName}!
+                Thanks for Your Order, {placedOrder.customerName}!
               </h2>
               <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
-                Your pure Satvik order has been received by our Pushpa Nagar kitchen team. Preparation with pure A2 cow ghee has commenced!
+                Your pure Satvik order has been received by our Pushpa Nagar kitchen team. Preparation with pure desi ghee has commenced!
               </p>
+            </div>
+
+            {/* Prominent Customer Thanks of Order Card with Items & Rs. */}
+            <div className="p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-400 dark:border-amber-600/80 text-left space-y-3 shadow-sm">
+              <div className="flex items-center justify-between pb-2 border-b border-amber-300 dark:border-amber-800">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🙏</span>
+                  <h3 className="font-extrabold text-sm text-stone-950 dark:text-white">
+                    Thanks of Order Summary
+                  </h3>
+                </div>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-600 text-white">
+                  PAID
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 font-mono">
+                  Ordered Items ({placedOrder.items.reduce((acc: number, i: any) => acc + (i.quantity || 1), 0)}):
+                </span>
+                <ul className="space-y-1 text-xs">
+                  {placedOrder.items.map((item: any, idx: number) => (
+                    <li key={idx} className="flex justify-between items-center text-stone-800 dark:text-stone-200">
+                      <span className="font-medium">• {item.name} × {item.quantity || 1}</span>
+                      <span className="font-bold font-mono">₹{item.price * (item.quantity || 1)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="pt-2.5 border-t border-amber-300 dark:border-amber-800 flex justify-between items-center">
+                <span className="text-xs font-bold uppercase text-stone-900 dark:text-white">
+                  Thanks of order for:
+                </span>
+                <span className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+                  ₹{placedOrder.total}
+                </span>
+              </div>
             </div>
 
             {/* Train Coach Delivery Confirmation Badge */}
@@ -304,29 +342,40 @@ export default function CartPage() {
               </div>
             )}
 
-            {/* WhatsApp Notification Alert Card */}
+            {/* WhatsApp Notification Alert Card - Detail goes ONLY ALWAYS to Admin 9981508165 */}
             <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-left space-y-2">
               <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-300">
                 <MessageSquare className="h-4 w-4 text-emerald-600 shrink-0" />
-                <span>Order Alert Dispatched to WhatsApp (9981508165)</span>
+                <span>Payment &amp; Ordered Items Details Sent to Admin (9981508165)</span>
               </div>
               <p className="text-[11px] text-emerald-700 dark:text-emerald-400 leading-relaxed">
-                A complete order notification with dish list, customer name, phone number, address, and cooking notes has been formatted and triggered to kitchen number <strong>9981508165</strong>.
+                Full payment proof and ordered items list have been formatted and directed only and always to Kitchen Admin at <strong>9981508165</strong>.
               </p>
-              {whatsappLink && (
-                <div className="pt-1">
+              <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                {whatsappLink && (
                   <a
                     href={whatsappLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                   >
                     <MessageSquare className="h-4 w-4" />
-                    <span>View / Send Order on WhatsApp</span>
+                    <span>Send Order Details to Admin (9981508165)</span>
                     <ExternalLink className="h-3.5 w-3.5" />
                   </a>
-                </div>
-              )}
+                )}
+                {placedOrder.phone && (
+                  <a
+                    href={generateCustomerThanksWhatsAppLink(placedOrder)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 py-2.5 px-4 rounded-xl border border-emerald-600 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-950/80 font-bold text-xs uppercase tracking-wider transition-colors inline-flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>Receive Thanks on My WhatsApp</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                )}
+              </div>
             </div>
 
             {/* Order Details Breakdown */}
@@ -430,7 +479,7 @@ export default function CartPage() {
                 <span>Your Food Delivery Basket</span>
               </h1>
               <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
-                Prepared strictly with pure A2 cow ghee, rock salt, and positive Vedic devotion.
+                Prepared strictly with pure desi ghee, rock salt, and positive Vedic devotion.
               </p>
             </div>
 
@@ -796,7 +845,7 @@ export default function CartPage() {
                     <span>Pure Food & Delivery Guarantee</span>
                   </div>
                   <p className="text-[11px] text-emerald-800 dark:text-emerald-400">
-                    Contactless hot delivery from our hygienic Pushpa Nagar kitchen. Cooked strictly with pure Gir Cow A2 ghee and Himalayan rock salt.
+                    Contactless hot delivery from our hygienic Pushpa Nagar kitchen. Cooked strictly with pure desi ghee and Himalayan rock salt.
                   </p>
                 </div>
 

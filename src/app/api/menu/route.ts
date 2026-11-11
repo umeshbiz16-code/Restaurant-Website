@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const newDish: MenuItem = {
       id: `dish_${Date.now()}`,
       name,
-      description: description || 'Prepared with pure A2 cow ghee and Vedic spices.',
+      description: description || 'Prepared with pure desi ghee and Vedic spices.',
       price: Number(price),
       category: category || 'Mains',
       image: image || '/images/satvik_royal_thali_1783699368595.jpg',
